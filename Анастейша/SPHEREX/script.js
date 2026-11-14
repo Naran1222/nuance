@@ -23,66 +23,132 @@ document.addEventListener('DOMContentLoaded', () => {
     const slider = document.getElementById('orbit-slider');
     const sunThumb = document.getElementById('sun-thumb');
     const orbitPath = document.getElementById('orbit-path');
-    const frameCounter = document.getElementById('frame-counter');
     const trackContainer = document.querySelector('.orbit-track-container');
 
-    // Отримуємо фізичну довжину кривої SVG
-    const pathLength = orbitPath.getTotalLength();
+    // Кнопки (використовуємо ВАШІ ID з HTML)
+    const playPauseBtn = document.getElementById('btn-play-pause');
+    const playPauseImg = document.getElementById('play-pause-img');
+    const btnPrev = document.getElementById('btn-rewind');   // Виправлено!
+    const btnNext = document.getElementById('btn-forward');  // Виправлено!
     
-    // Внутрішні розміри viewBox (як ми задали в HTML: 0 0 1000 100)
+    // Лічильник кадрів (якщо ви його додасте пізніше, він запрацює, а поки код не ламатиметься)
+    const frameCounter = document.getElementById('frame-counter');
+
+    const pathLength = orbitPath.getTotalLength();
     const svgViewBoxWidth = 1000;
     const svgViewBoxHeight = 100;
 
+    let lastReportedFrame = 1;
+    let isPlaying = false;
+    let playInterval;
+
+    // Головна функція оновлення позиції
     function updateSunPosition() {
-        const val = parseInt(slider.value, 10);
+        const rawVal = parseFloat(slider.value);
         const max = parseInt(slider.max, 10);
+        const min = parseInt(slider.min, 10);
+        const currentFrame = Math.round(rawVal);
 
-        // 1. Оновлюємо текст лічильника
-        frameCounter.textContent = `Кадр: ${val} / ${max}`;
+        // Оновлюємо лічильник тільки якщо він існує в HTML
+        if (frameCounter) {
+            frameCounter.textContent = `Кадр: ${currentFrame} / ${max}`;
+        }
 
-        // 2. Обчислюємо, на скільки відсотків пройдено шлях (від 0 до 1)
-        const progress = (val - 1) / (max - 1); 
-
-        // 3. Знаходимо координати точки на кривій
+        const progress = (rawVal - min) / (max - min); 
         const point = orbitPath.getPointAtLength(progress * pathLength);
-
-        // 4. Оскільки SVG розтягується під ширину екрану (через width: 100%), 
-        // нам треба перевести координати viewBox у реальні пікселі контейнера
-        const containerRect = trackContainer.getBoundingClientRect();
         
+        const containerRect = trackContainer.getBoundingClientRect();
         const pixelX = (point.x / svgViewBoxWidth) * containerRect.width;
         const pixelY = (point.y / svgViewBoxHeight) * containerRect.height;
 
-        // 5. Рухаємо сонечко
         sunThumb.style.left = `${pixelX}px`;
         sunThumb.style.top = `${pixelY}px`;
+
+        if (currentFrame !== lastReportedFrame) {
+            lastReportedFrame = currentFrame;
+            // Місце для відправки кадру на бекенд
+        }
     }
 
-    // Слухаємо зміни повзунка
-    slider.addEventListener('input', updateSunPosition);
+    // ==========================================
+    // ЛОГІКА СЛАЙДШОУ (Автоматичне відтворення)
+    // ==========================================
+    function startSlideshow() {
+        isPlaying = true;
+        if (playPauseImg) playPauseImg.src = 'pause.png';
+        
+        playInterval = setInterval(() => {
+            let currentVal = parseFloat(slider.value);
+            let maxVal = parseFloat(slider.max);
+            
+            if (currentVal >= maxVal) {
+                slider.value = slider.min; // Зациклюємо слайдшоу
+            } else {
+                slider.value = currentVal + 1; // Крок на 1 кадр
+            }
+            updateSunPosition();
+        }, 500); 
+    }
 
-    // Оновлюємо позицію при зміні розміру вікна (якщо інтерфейс адаптивний)
-    window.addEventListener('resize', updateSunPosition);
+    function pauseSlideshow() {
+        if (isPlaying) {
+            isPlaying = false;
+            if (playPauseImg) playPauseImg.src = 'play.png';
+            clearInterval(playInterval);
+        }
+    }
 
-    // Встановлюємо сонечко на старт при завантаженні сторінки
-    updateSunPosition();
-    // Находим центральную кнопку и картинку внутри нее
-const playPauseBtn = document.getElementById('btn-play-pause');
-const playPauseImg = document.getElementById('play-pause-img');
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) pauseSlideshow();
+            else startSlideshow();
+        });
+    }
 
-// Переменная состояния плеера
-let isPlaying = false;
-
-playPauseBtn.addEventListener('click', () => {
-    // Меняем статус на противоположный
-    isPlaying = !isPlaying;
+    // ==========================================
+    // ЛОГІКА РУЧНОГО КЕРУВАННЯ
+    // ==========================================
     
-    if (isPlaying) {
-        // Если играет -> показываем паузу
-        playPauseImg.src = 'pause.png';
-    } else {
-        // Если на паузе -> показываем плей
-        playPauseImg.src = 'play.png';
+    // Перетягування мишкою
+    slider.addEventListener('input', () => {
+        pauseSlideshow();
+        updateSunPosition();
+    });
+
+    // Стрілочка НАЗАД
+    if (btnPrev) {
+        btnPrev.addEventListener('click', () => {
+            pauseSlideshow(); 
+            let currentFrame = Math.round(parseFloat(slider.value));
+            if (currentFrame > parseInt(slider.min, 10)) {
+                slider.value = currentFrame - 1;
+                updateSunPosition();
+            }
+        });
     }
+
+    // Стрілочка ВПЕРЕД
+    if (btnNext) {
+        btnNext.addEventListener('click', () => {
+            pauseSlideshow(); 
+            let currentFrame = Math.round(parseFloat(slider.value));
+            if (currentFrame < parseInt(slider.max, 10)) {
+                slider.value = currentFrame + 1;
+                updateSunPosition();
+            }
+        });
+    }
+
+    // Ініціалізація
+    window.addEventListener('resize', updateSunPosition);
+    updateSunPosition();
 });
+
+// Кнопка детектора
+document.getElementById('detect-btn')?.addEventListener('click', function() {
+  const loader = document.getElementById('space-loader');
+  if (loader) {
+      loader.classList.add('active');
+      setTimeout(() => loader.classList.remove('active'), 3000);
+  }
 });

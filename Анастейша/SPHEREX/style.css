@@ -8,14 +8,12 @@ body {
     overflow: hidden;
     user-select: none;
     -webkit-font-smoothing: antialiased;
-    
-    /* ДОДАНО: Твій кастомний курсор для всієї сторінки */
-    cursor: url('cursor.png') 0 0, auto;
-}
 
+     cursor: url('cursor.png') 0 0, auto;
+}
 .sidebar {
     width: 360px;
-    background: rgba(18, 20, 29, 0.75);
+    background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 30px;
@@ -23,10 +21,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 25px;
-    border-right: 1px solid rgba(51, 56, 77, 0.5);
+    border-right: 1px solid rgba(219, 222, 236, 0.5);
     z-index: 10;
+  
 }
-
 .logo {
     font-size: 24px;
     font-weight: 700;
@@ -36,7 +34,6 @@ body {
 .logo .sub-word {
     display: block;
 }
-
 .desc {
     font-size: 14px;
     color: #A0A5B5;
@@ -44,7 +41,7 @@ body {
     margin: 0;
 }
 
-/* потужна таймлайн */
+/*потужна таймлайн*/
 
 .orbital-timeline-bar {
     position: absolute;
@@ -54,8 +51,8 @@ body {
     width: 85%;
     max-width: 750px;
     background: transparent; /* Прибираємо темний фон */
-    border: none;            /* Прибираємо рамку */
-    box-shadow: none;        /* Прибираємо тіні вікна */
+    border: none;             /* Прибираємо рамку */
+    box-shadow: none;         /* Прибираємо тіні вікна */
     padding: 0;
     z-index: 50;
 }
@@ -103,8 +100,9 @@ body {
     width: 100%;
     height: 100%;
     opacity: 0; /* Робимо невидимим */
+    cursor: pointer;
     z-index: 10;
-    
+
     /* ЗМІНЕНО: Примусово зберігаємо наш космічний курсор при наведенні на повзунок */
     cursor: url('cursor.png') 0 0, pointer !important;
 }
@@ -129,6 +127,158 @@ body {
     border-radius: 4px;
     border: 1px solid rgba(0, 229, 255, 0.3);
 }
+
+.detection-container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+}
+
+.detect-btn {
+  background-color: #fbd300; 
+  color: #1c1c20; 
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+/* Контейнер лоадера */
+.space-loader {
+  position: absolute;
+  bottom: 60px;
+  width: 70px; 
+  height: 70px;
+  display: none; 
+  justify-content: center;
+  align-items: center;
+}
+
+.space-loader.active {
+  display: flex;
+}
+
+/* НОВЕ: Лінія орбіти з ефектом розчинення */
+.orbit-tail {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Сама лінія тепер трохи яскравіша */
+  border: 2px solid rgba(64, 224, 208, 0.9);
+  
+  /* МАГІЯ: Ця маска робить половину кола прозорою, а іншу половину плавно виводить у суцільну лінію */
+  -webkit-mask: conic-gradient(from 90deg, transparent 50%, black 100%);
+  mask: conic-gradient(from 90deg, transparent 50%, black 100%);
+  
+  /* Крутимо цей градієнт-маску з тією ж швидкістю, що й зірку */
+  animation: spin-tail 2s linear infinite;
+}
+
+/* Зірка (без змін) */
+.orbiting-star {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 12px 4px rgba(255, 255, 255, 0.9),
+    0 0 25px 10px rgba(64, 224, 208, 0.6);
+  animation: orbit-spin 2s linear infinite;
+}
+
+/* Горизонтальний промінь (блік) */
+.orbiting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90px;
+  height: 2px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%);
+  transform: translate(-50%, -50%);
+}
+
+/* Анімація маски-хвоста (просто крутиться навколо центру) */
+@keyframes spin-tail {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Анімація зірки (рухається по краю, тримаючи промінь горизонтально) */
+@keyframes orbit-spin {
+  0% { transform: rotate(0deg) translateX(35px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(35px) rotate(-360deg); }
+}
+
+/*рамка доробити*/
+
+/* Основна рамка сайдбару */
+.sidebar-info-frame {
+  /* Зменшуємо ширину та центруємо по горизонталі сайдбару */
+  width: 85%; 
+  margin: 0 auto; 
+  box-sizing: border-box; /* Гарантує, що padding не розширюватиме блок */
+  
+  /* Прозорий фон (для чорного змініть на background: #000000;) */
+  background: transparent; 
+  
+  /* Ніжно-блакитна рамка */
+  border: 1px solid rgba(0, 229, 255, 0.4); 
+  
+  /* Загострені кути */
+  border-radius: 0; 
+  
+  padding: 20px;
+  
+  /* Легке блакитне світіння зовні та всередині */
+  box-shadow: 
+    0 0 15px rgba(0, 229, 255, 0.1), 
+    inset 0 0 10px rgba(0, 229, 255, 0.05);
+  
+  font-family: 'Arial', sans-serif;
+}
+
+/* Контейнер для кожного окремого поля */
+.frame-data-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(0, 229, 255, 0.2); /* Тонка пунктирна лінія-розділювач */
+}
+
+/* Останньому елементу прибираємо відступ і лінію знизу */
+.frame-data-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Назви полів (Name, Coordinates, Detector Band) */
+.frame-label {
+  font-size: 11px;
+  color: rgba(0, 229, 255, 0.8); /* Ніжно-блакитний колір тексту */
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+/* Значення полів */
+.frame-value {
+  font-size: 15px;
+  color: #ffffff; /* Білий колір для контрасту */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+}
+
 /* ========================================= */
 /* Стили для кнопок управления плеером       */
 /* ========================================= */
@@ -149,7 +299,7 @@ body {
     outline: none;
     padding: 0;
     /* Применяем твой курсор на кнопки */
-    cursor: url('изображение_2026-11-14_132931772.png') 0 0, pointer !important;
+    cursor: url('cursor.png') 0 0, pointer !important;
     transition: transform 0.2s ease, filter 0.2s ease;
     display: flex;
     justify-content: center;

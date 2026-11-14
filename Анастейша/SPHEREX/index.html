@@ -8,74 +8,84 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="sidebar">
-        <h1 class="logo">SubStellar 
-            <span class="sub-word">SPHEREx</span>
-        </h1>
-        <div class="desc">Data Detective — панель керування.</div>
-    </div>
-
+    <!-- Основна логіка почалась -->
+    <div class="app-container">
     
-<div class="viewport">
-    <div class="sci-fi-crosshair" id="crosshair">
-        <span class="line-top"></span>
-        <span class="line-bottom"></span>
-        <span class="line-left"></span>
-        <span class="line-right"></span>
-    </div>
-    
-    <!-- Панель таймлайну з CSS-орбітою -->
- <div class="orbital-timeline-bar">
-  
-  <!-- Контейнер, у якому лежать лінія, сонечко та повзунок -->
-  <div class="orbit-track-container">
-    
-    <!-- SVG з пунктирною дугою -->
-    <svg class="orbital-svg" viewBox="0 0 1000 100" preserveAspectRatio="none">
-      <path id="orbit-path" d="M 20,90 Q 500,0 980,90" fill="transparent" stroke="#FFB300" stroke-width="3" stroke-dasharray="12, 10" />
-    </svg>
-
-    <!-- Твоє намальоване сонечко -->
-    <div class="sun-orbit-thumb" id="sun-thumb"></div>
-
-    <!-- Невидимий повзунок для керування -->
-    <input type="range" min="1" max="100" value="1" class="orbit-range-input" id="orbit-slider">
-    
-  </div>
-  
-<div class="playback-controls">
-        <button class="control-btn" id="btn-rewind">
-            <img src="left_arrow.png" alt="Назад">
-        </button>
+        <!-- САЙДБАР (Спочатку на весь екран, потім з'їжджає вліво) -->
+        <div class="sidebar expanded" id="sidebar">
+            <h1 class="logo">SubStellar <span class="sub-word">SPHEREx</span></h1>
+            <div class="desc">Data Detective — панель керування.</div>
         
-        <button class="control-btn" id="btn-play-pause">
-            <!-- По умолчанию показываем кнопку play -->
-            <img src="play.png" alt="Плей/Пауза" id="play-pause-img">
-        </button>
+            <!-- Рамка з даними -->
+            <div class="sidebar-info-frame" id="info-frame">
+                <div class="frame-data-row">
+                    <span class="frame-label">Name</span>
+                    <span class="frame-value" id="val-name">---</span>
+                </div>
+                <div class="frame-data-row">
+                    <span class="frame-label">Coordinates</span>
+                    <span class="frame-value" id="val-coords">---</span>
+                </div>
+                <div class="frame-data-row">
+                    <span class="frame-label">Detector Band</span>
+                    <span class="frame-value" id="val-band">---</span>
+                </div>
+            </div>
+
+            <div class="detection-container">
+                <div class="space-loader" id="space-loader">
+                    <div class="orbit-tail"></div>
+                    <div class="orbiting-star"></div>
+                </div>
+                <button class="detect-btn" id="detect-btn">ВИЯВИТИ АНОМАЛІЇ</button>
+            </div>
+        </div>
+
+        <!-- ГОЛОВНА РОБОЧА ЗОНА -->
+        <div class="main-viewport hidden" id="main-viewport">
         
-        <button class="control-btn" id="btn-forward">
-            <img src="right_arrow.png" alt="Вперед">
-        </button>
+            <!-- Контейнер для фото з бекенду -->
+            <div class="image-display-area">
+                <img src="placeholder.jpg" alt="Space Frame" class="backend-frame-img" id="current-frame-img">
+            
+                <div class="sci-fi-crosshair" id="crosshair">
+                    <span class="line-top"></span><span class="line-bottom"></span>
+                    <span class="line-left"></span><span class="line-right"></span>
+                </div>
+            </div>
+
+            <!-- Таймлайн під фотографією -->
+            <div class="orbital-timeline-bar">
+                <div class="orbit-track-container">
+                    <!-- SVG з пунктирною дугою -->
+                    <svg class="orbital-svg" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                        <path id="orbit-path" d="M 20,90 Q 500,0 980,90" fill="transparent" stroke="#FFB300" stroke-width="3" stroke-dasharray="12, 10" />
+                    </svg>
+
+                    <!-- Сонечко та повзунок -->
+                    <div class="sun-orbit-thumb" id="sun-thumb"></div>
+                    <input type="range" min="1" max="100" step="any" value="1" class="orbit-range-input" id="orbit-slider">
+                </div>
+
+                <div class="playback-controls">
+                    <button class="control-btn" id="btn-rewind">
+                        <img src="left_arrow.png" alt="Назад">
+                    </button>
+                    <button class="control-btn" id="btn-play-pause">
+                        <img src="play.png" alt="Плей/Пауза" id="play-pause-img">
+                    </button>
+                    <button class="control-btn" id="btn-forward">
+                        <img src="right_arrow.png" alt="Вперед">
+                    </button>
+                </div>
+                
+                <div class="timeline-labels">
+                    <span class="frame-indicator" id="frame-counter">Кадр: 1 / 100</span>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- ========================================= -->
-
-    <!-- Підписи дат і лічильник кадрів -->
-    <div class="timeline-labels">
-        <span>Березень 2025</span>
-        <span class="frame-indicator" id="frame-counter">Кадр: 1 / 100</span>
-        <span>Вересень 2026</span>
-    </div>
-
-  <!-- Підписи дат і лічильник кадрів -->
-  <div class="timeline-labels">
-    <span>Березень 2025</span>
-    <span class="frame-indicator" id="frame-counter">Кадр: 1 / 100</span>
-    <span>Вересень 2026</span>
-  </div>
-  
-</div>
-</div>
-
+    <!-- Основна логіка закінчилась -->
 
     <script src="script.js" defer></script>
 </body>
