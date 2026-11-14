@@ -468,3 +468,30 @@ body {
     width: auto;
     object-fit: contain;
 }
+.color-prompt-frame {
+    width: 85%;
+    margin: 30px auto 0;
+    background: transparent;
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    box-sizing: border-box;
+    /* Добавляем плавность появления/исчезновения */
+    transition: opacity 0.5s ease; 
+}
+
+/* СКРЫВАЕМ рамку, когда сайдбар на весь экран (на стартовой странице) */
+.sidebar.expanded .color-prompt-frame {
+    opacity: 0;
+    pointer-events: none; /* Чтобы не нажималась, пока скрыта */
+}
+
+/* ПОКАЗЫВАЕМ рамку, когда сайдбар съехал влево (в рабочем режиме) */
+.sidebar.collapsed .color-prompt-frame {
+    opacity: 1;
+    pointer-events: auto;
+}
