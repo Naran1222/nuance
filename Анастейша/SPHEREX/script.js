@@ -19,23 +19,51 @@ viewport.addEventListener('mouseleave', () => {
     crosshair.style.display = 'none';
 });
 /*ебучая орбита*/
-const solarRange = document.getElementById('solarRange');
-const sunThumb = document.getElementById('sunThumb');
-const frameNumber = document.getElementById('frameNumber');
+document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('orbit-slider');
+    const sunThumb = document.getElementById('sun-thumb');
+    const orbitPath = document.getElementById('orbit-path');
+    const frameCounter = document.getElementById('frame-counter');
+    const trackContainer = document.querySelector('.orbit-track-container');
 
-solarRange.addEventListener('input', (e) => {
-    const val = e.target.value; // від 1 до 100
-    const percent = (val - 1) / 99; // від 0 до 1
+    // Отримуємо фізичну довжину кривої SVG
+    const pathLength = orbitPath.getTotalLength();
     
-    // Рухаємо сонечко по горизонталі
-    const leftPos = 5 + (percent * 90);
-    
-    // Математичне зміщення по дузі, щоб сонечко йшло точно по твоїй намальованій траєкторії
-    const verticalOffset = Math.sin(percent * Math.PI) * -15; 
-    
-    sunThumb.style.left = `${leftPos}%`;
-    sunThumb.style.top = `calc(50% + ${verticalOffset}px)`;
-    
-    // Оновлюємо лічильник кадрів від 1 до 100
-    frameNumber.textContent = val;
+    // Внутрішні розміри viewBox (як ми задали в HTML: 0 0 1000 100)
+    const svgViewBoxWidth = 1000;
+    const svgViewBoxHeight = 100;
+
+    function updateSunPosition() {
+        const val = parseInt(slider.value, 10);
+        const max = parseInt(slider.max, 10);
+
+        // 1. Оновлюємо текст лічильника
+        frameCounter.textContent = `Кадр: ${val} / ${max}`;
+
+        // 2. Обчислюємо, на скільки відсотків пройдено шлях (від 0 до 1)
+        const progress = (val - 1) / (max - 1); 
+
+        // 3. Знаходимо координати точки на кривій
+        const point = orbitPath.getPointAtLength(progress * pathLength);
+
+        // 4. Оскільки SVG розтягується під ширину екрану (через width: 100%), 
+        // нам треба перевести координати viewBox у реальні пікселі контейнера
+        const containerRect = trackContainer.getBoundingClientRect();
+        
+        const pixelX = (point.x / svgViewBoxWidth) * containerRect.width;
+        const pixelY = (point.y / svgViewBoxHeight) * containerRect.height;
+
+        // 5. Рухаємо сонечко
+        sunThumb.style.left = `${pixelX}px`;
+        sunThumb.style.top = `${pixelY}px`;
+    }
+
+    // Слухаємо зміни повзунка
+    slider.addEventListener('input', updateSunPosition);
+
+    // Оновлюємо позицію при зміні розміру вікна (якщо інтерфейс адаптивний)
+    window.addEventListener('resize', updateSunPosition);
+
+    // Встановлюємо сонечко на старт при завантаженні сторінки
+    updateSunPosition();
 });

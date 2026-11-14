@@ -23,27 +23,36 @@
         <span class="line-left"></span>
         <span class="line-right"></span>
     </div>
-    <div class="map-image-display">
-        <img id="spaceImage" src="photos/frame_001.jpg" alt="Знімок з орбіти">
-        <div class="image-counter">Кадр: <span id="frameNumber">1</span> / 100</div>
-    </div>
+    
+    <!-- Панель таймлайну з CSS-орбітою -->
+ <div class="orbital-timeline-bar">
+  
+  <!-- Контейнер, у якому лежать лінія, сонечко та повзунок -->
+  <div class="orbit-track-container">
+    
+    <!-- SVG з пунктирною дугою -->
+    <svg class="orbital-svg" viewBox="0 0 1000 100" preserveAspectRatio="none">
+      <path id="orbit-path" d="M 20,90 Q 500,0 980,90" fill="transparent" stroke="#FFB300" stroke-width="3" stroke-dasharray="12, 10" />
+    </svg>
 
-    <!-- Таймлайн із твоїм малюнком орбіти на фоні -->
-    <div class="orbital-timeline-bar">
-        <div class="orbital-curve-track">
-            <!-- Твоє намальоване сонечко як рухомий бігунок -->
-            <div class="sun-orbit-thumb" id="sunThumb"></div>
-            
-            <!-- Невидимий повзунок для керування мишею -->
-            <input type="range" id="solarRange" min="1" max="100" value="1" class="orbit-range-input">
-        </div>
-        
-        <div class="timeline-labels">
-            <span>Березень 2025</span>
-            <span>Вересень 2026</span>
-        </div>
-    </div>
+    <!-- Твоє намальоване сонечко -->
+    <div class="sun-orbit-thumb" id="sun-thumb"></div>
+
+    <!-- Невидимий повзунок для керування -->
+    <input type="range" min="1" max="100" value="1" class="orbit-range-input" id="orbit-slider">
+    
+  </div>
+
+  <!-- Підписи дат і лічильник кадрів -->
+  <div class="timeline-labels">
+    <span>Березень 2025</span>
+    <span class="frame-indicator" id="frame-counter">Кадр: 1 / 100</span>
+    <span>Вересень 2026</span>
+  </div>
+  
 </div>
+</div>
+
 
     <script src="script.js" defer></script>
 </body>
