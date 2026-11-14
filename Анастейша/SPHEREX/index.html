@@ -9,12 +9,41 @@
 </head>
 <body>
     <div class="sidebar">
-        <h1 class="logo">SubStellar <span class="sub-word">SPHEREx</span></h1>
+        <h1 class="logo">SubStellar 
+            <span class="sub-word">SPHEREx</span>
+        </h1>
         <div class="desc">Data Detective — панель керування.</div>
     </div>
 
-    <!-- Робоча зона без сторонніх бібліотек -->
-    <div class="viewport"></div>
+    
+<div class="viewport">
+    <div class="sci-fi-crosshair" id="crosshair">
+        <span class="line-top"></span>
+        <span class="line-bottom"></span>
+        <span class="line-left"></span>
+        <span class="line-right"></span>
+    </div>
+    <div class="map-image-display">
+        <img id="spaceImage" src="photos/frame_001.jpg" alt="Знімок з орбіти">
+        <div class="image-counter">Кадр: <span id="frameNumber">1</span> / 100</div>
+    </div>
+
+    <!-- Таймлайн із твоїм малюнком орбіти на фоні -->
+    <div class="orbital-timeline-bar">
+        <div class="orbital-curve-track">
+            <!-- Твоє намальоване сонечко як рухомий бігунок -->
+            <div class="sun-orbit-thumb" id="sunThumb"></div>
+            
+            <!-- Невидимий повзунок для керування мишею -->
+            <input type="range" id="solarRange" min="1" max="100" value="1" class="orbit-range-input">
+        </div>
+        
+        <div class="timeline-labels">
+            <span>Березень 2025</span>
+            <span>Вересень 2026</span>
+        </div>
+    </div>
+</div>
 
     <script src="script.js" defer></script>
 </body>
