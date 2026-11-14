@@ -16,19 +16,22 @@
             <h1 class="logo">SubStellar <span class="sub-word">SPHEREx</span></h1>
             <div class="desc">Data Detective — панель керування.</div>
             
+            <button class="forward-action-btn hidden" id="btn-go-forward">
+                <img src="back right.png" alt="Forward">
+            </button>
+            
             <!-- Рамка з даними -->
             <div class="sidebar-info-frame" id="info-frame">
+
+                  <!-- Об'єднаний рядок для назви АБО координат -->
                 <div class="frame-data-row">
-                    <span class="frame-label">Name</span>
-                    <span class="frame-value" id="val-name">---</span>
+                    <span class="frame-label">NAME OR COORDINATES</span>
+                    <span class="frame-value" id="val-target" contenteditable="true" spellcheck="false">Planet Earth</span>
                 </div>
+
                 <div class="frame-data-row">
-                    <span class="frame-label">Coordinates</span>
-                    <span class="frame-value" id="val-coords">---</span>
-                </div>
-                <div class="frame-data-row">
-                    <span class="frame-label">Detector Band</span>
-                    <span class="frame-value" id="val-band">---</span>
+                        <span class="frame-label">Detector Band</span>
+                        <span class="frame-value" id="val-band" contenteditable="true" spellcheck="false">Planet Earth</span>
                 </div>
             </div>
 
@@ -43,7 +46,11 @@
 
         <!-- ГОЛОВНА РОБОЧА ЗОНА -->
         <div class="main-viewport hidden" id="main-viewport">
+            
         
+            <button class="back-action-btn" id="btn-go-back">
+                <img src="back.png" alt="Back">
+            </button>
             <!-- Контейнер для фото з бекенду -->
             <div class="image-display-area">
                 <img src="placeholder.jpg" alt="Space Frame" class="backend-frame-img" id="current-frame-img">

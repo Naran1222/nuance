@@ -15,30 +15,41 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.75); /* Темний космічний фон */
+    background-color: rgba(0, 0, 0, 0.75); 
+    
+    background-image: url('-2147483648_-216231.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
 }
 
+/* Базовий стиль сайдбару */
 .sidebar {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.75);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
     height: 100vh;
+    box-sizing: border-box; /* Щоб відступи не ламали ширину */
+    position: relative;
 }
 
-/* Стан: на весь екран */
+/* СТАН 1: Стартовий екран (на всю ширину екрана) */
 .sidebar.expanded {
-    width: 100%;
+    width: 100vw; /* Займає рівно 100% ширини вікна */
+    border-right: none; /* Прибираємо праву лінію на головному екрані */
+    flex-shrink: 0;
 }
 
-/* Стан: від'їхав вліво */
+/* СТАН 2: Робочий режим (звужений сайдбар) */
 .sidebar.collapsed {
     width: 350px;
+    min-width: 350px; /* Забороняємо йому стискатися менше цієї ширини */
     justify-content: flex-start;
     padding-top: 40px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Лінія з'являється тільки тут */
 }
 
 /* Новий в'юпорт (робоча зона) */
@@ -56,6 +67,9 @@ body {
     opacity: 0;
     pointer-events: none;
     flex: 0;
+    width: 0;
+    padding: 0;
+    overflow: hidden;
 }
   
 
@@ -111,12 +125,8 @@ body {
     width: 100%;
     max-width: 600px;   /* Можете налаштувати ширину під себе */
     
-    background: rgba(0, 0, 0, 0.75);
-    border: 1px solid rgba(0, 0, 0, 0.75);
-    border-radius: 14px;
-    padding: 18px 25px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.75);
+    
+    
 }
 
 /* Обгортка для орбіти, відносно якої все позиціонується */
@@ -332,12 +342,19 @@ body {
 }
 
 /* Значення полів */
-.frame-value {
-  font-size: 15px;
-  color: #ffffff; /* Білий колір для контрасту */
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+.frame-value[contenteditable="true"] {
+    outline: none;
+    cursor: text;
+    display: inline-block; /* Щоб можна було клікнути навіть якщо порожньо */
+    min-width: 100px; /* Мінімальна ширина для порожнього поля */
+    transition: text-shadow 0.2s ease;
+}
+
+.frame-value[contenteditable="true"]:focus {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.9); /* Неонове світіння при наборі тексту */
+}
+.frame-value[contenteditable="true"] {
+    outline: none;
 }
 
 /* ========================================= */
@@ -381,6 +398,73 @@ body {
 /* Настройки размера самих иконок */
 .control-btn img {
     height: 35px; /* Задай нужный размер иконок */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Кнопка BACK у робочій зоні */
+.back-action-btn {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    z-index: 100;
+}
+
+.back-action-btn img {
+    height: 40px; /* Розмір кнопки (можна змінити) */
+    width: auto;
+    object-fit: contain;
+}
+
+.back-action-btn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)); /* Блакитне світіння як у інших кнопок */
+}
+
+.back-action-btn:active {
+    transform: scale(0.95);
+}
+
+/* Кнопка "Вперед" на главной странице */
+/* Кнопка "Вперед" на головній сторінці (закріплена внизу праворуч) */
+.forward-action-btn {
+    position: absolute;
+    bottom: 40px;          /* Відступ від нижнього краю */
+    right: 40px;           /* Відступ від правого краю */
+    
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease, opacity 0.5s ease;
+    opacity: 1;
+    pointer-events: auto;
+    
+}
+
+/* Стан, коли кнопка схована */
+.forward-action-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Ефекти наведення (translateX тут більше не потрібен) */
+.forward-action-btn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+}
+
+.forward-action-btn:active {
+    transform: scale(0.95);
+}
+
+.forward-action-btn img {
+    height: 40px;
     width: auto;
     object-fit: contain;
 }

@@ -37,14 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Імітуємо дані, що прийшли з бекенду
-                const valName = document.getElementById('val-name');
-                if (valName) valName.textContent = "Anomaly Zeta-9";
-                
-                const valCoords = document.getElementById('val-coords');
-                if (valCoords) valCoords.textContent = "LAT 51.4, LON -0.1";
-                
+                const valTarget = document.getElementById('val-target');
+                if (valTarget) valTarget.textContent = "e.g. Orion Nebula"; 
+
                 const valBand = document.getElementById('val-band');
-                if (valBand) valBand.textContent = "Gamma Ray";
+                if (valBand) valBand.textContent = "e.g. Near-IR";  
 
                 // ВАЖЛИВО: Кажемо сонечку перерахувати свої координати, бо екран щойно розширився
                 setTimeout(() => {
@@ -171,4 +168,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', updateSunPosition);
     updateSunPosition();
+});
+
+const btnGoBack = document.getElementById('btn-go-back');
+const sidebar = document.querySelector('.sidebar');
+const mainViewport = document.querySelector('.main-viewport');
+
+// Логіка повернення на початковий екран
+btnGoBack.addEventListener('click', () => {
+    // Ховаємо робочу зону з сонцем
+    mainViewport.classList.add('hidden');
+    
+    // Розгортаємо сайдбар назад на весь екран
+    sidebar.classList.remove('collapsed');
+    sidebar.classList.add('expanded');
+});
+
+
+const btnGoForward = document.getElementById('btn-go-forward'); // НОВАЯ КНОПКА (стрелка вправо)
+
+// Логика нажатия на "НАЗАД" (находимся у солнца, возвращаемся на главную)
+btnGoBack.addEventListener('click', () => {
+    // Ховаємо робочу зону з сонцем
+    mainViewport.classList.add('hidden');
+    
+    // Розгортаємо сайдбар назад на весь екран
+    sidebar.classList.remove('collapsed');
+    sidebar.classList.add('expanded');
+    
+    // ТЕПЕРЬ ПОКАЗЫВАЕМ НОВУЮ КНОПКУ, так как мы вернулись с рабочей зоны
+    btnGoForward.classList.remove('hidden');
+});
+
+// Логика нажатия на новую кнопку "ВПЕРЕД" (возвращаемся к солнцу)
+btnGoForward.addEventListener('click', () => {
+    // Згортаємо сайдбар
+    sidebar.classList.remove('expanded');
+    sidebar.classList.add('collapsed');
+    
+    // Показуємо робочу зону з сонцем
+    mainViewport.classList.remove('hidden');
 });
