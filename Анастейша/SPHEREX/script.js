@@ -1,38 +1,76 @@
-/*тимчасово, щоб глянути, як працює курсор*/
-const viewport = document.querySelector('.viewport');
-const crosshair = document.getElementById('crosshair');
-
-viewport.addEventListener('mousemove', (e) => {
-    const rect = viewport.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    crosshair.style.left = `${x}px`;
-    crosshair.style.top = `${y}px`;
-});
-
-viewport.addEventListener('mouseenter', () => {
-    crosshair.style.display = 'block';
-});
-
-viewport.addEventListener('mouseleave', () => {
-    crosshair.style.display = 'none';
-});
-/*ебучая орбита*/
 document.addEventListener('DOMContentLoaded', () => {
+    
+    // ==========================================
+    // 1. ЛОГІКА ПЕРЕХОДУ НА РОБОЧУ ЗОНУ (Наступна сторінка)
+    // ==========================================
+    const detectBtn = document.getElementById('detect-btn');
+    const loader = document.getElementById('space-loader');
+    const sidebar = document.getElementById('sidebar');
+    const mainViewport = document.getElementById('main-viewport');
+
+    // Перевіряємо, чи є кнопка на сторінці, щоб код не ламався
+    if (detectBtn) {
+        detectBtn.addEventListener('click', function() {
+            
+            // 1. Запускаємо лоадер-зірку
+            if (loader) loader.classList.add('active');
+            detectBtn.style.opacity = '0.5';
+            detectBtn.style.pointerEvents = 'none'; // Блокуємо повторні кліки
+
+            // 2. Імітація завантаження (2 секунди), після чого з'являється робоча зона
+            setTimeout(() => {
+                if (loader) loader.classList.remove('active');
+                
+                // Ховаємо блок із зіркою та кнопкою назавжди
+                const detectContainer = document.querySelector('.detection-container');
+                if (detectContainer) detectContainer.style.display = 'none';
+
+                // Запускаємо CSS-анімацію переходу (звужуємо сайдбар)
+                if (sidebar) {
+                    sidebar.classList.remove('expanded');
+                    sidebar.classList.add('collapsed');
+                }
+                
+                // Показуємо головну зону з фото та таймлайном
+                if (mainViewport) {
+                    mainViewport.classList.remove('hidden');
+                }
+
+                // Імітуємо дані, що прийшли з бекенду
+                const valName = document.getElementById('val-name');
+                if (valName) valName.textContent = "Anomaly Zeta-9";
+                
+                const valCoords = document.getElementById('val-coords');
+                if (valCoords) valCoords.textContent = "LAT 51.4, LON -0.1";
+                
+                const valBand = document.getElementById('val-band');
+                if (valBand) valBand.textContent = "Gamma Ray";
+
+                // ВАЖЛИВО: Кажемо сонечку перерахувати свої координати, бо екран щойно розширився
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize')); 
+                }, 800); 
+                
+            }, 2000); // 2000 мілісекунд = 2 секунди
+        });
+    }
+
+    // ==========================================
+    // 2. ЛОГІКА ТАЙМЛАЙНУ ТА ПЛЕЄРА
+    // ==========================================
     const slider = document.getElementById('orbit-slider');
     const sunThumb = document.getElementById('sun-thumb');
     const orbitPath = document.getElementById('orbit-path');
     const trackContainer = document.querySelector('.orbit-track-container');
+    const frameCounter = document.getElementById('frame-counter');
 
-    // Кнопки (використовуємо ВАШІ ID з HTML)
     const playPauseBtn = document.getElementById('btn-play-pause');
     const playPauseImg = document.getElementById('play-pause-img');
-    const btnPrev = document.getElementById('btn-rewind');   // Виправлено!
-    const btnNext = document.getElementById('btn-forward');  // Виправлено!
-    
-    // Лічильник кадрів (якщо ви його додасте пізніше, він запрацює, а поки код не ламатиметься)
-    const frameCounter = document.getElementById('frame-counter');
+    const btnPrev = document.getElementById('btn-rewind');
+    const btnNext = document.getElementById('btn-forward');
+
+    // Якщо на сторінці немає повзунка - не виконуємо цей код далі
+    if (!slider || !sunThumb || !orbitPath) return;
 
     const pathLength = orbitPath.getTotalLength();
     const svgViewBoxWidth = 1000;
@@ -42,14 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaying = false;
     let playInterval;
 
-    // Головна функція оновлення позиції
     function updateSunPosition() {
         const rawVal = parseFloat(slider.value);
         const max = parseInt(slider.max, 10);
         const min = parseInt(slider.min, 10);
         const currentFrame = Math.round(rawVal);
 
-        // Оновлюємо лічильник тільки якщо він існує в HTML
         if (frameCounter) {
             frameCounter.textContent = `Кадр: ${currentFrame} / ${max}`;
         }
@@ -58,6 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const point = orbitPath.getPointAtLength(progress * pathLength);
         
         const containerRect = trackContainer.getBoundingClientRect();
+        
+        // ЗАПОБІЖНИК: Якщо блок схований, не намагаємося рахувати позицію
+        if (containerRect.width === 0) return; 
+
         const pixelX = (point.x / svgViewBoxWidth) * containerRect.width;
         const pixelY = (point.y / svgViewBoxHeight) * containerRect.height;
 
@@ -66,25 +106,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentFrame !== lastReportedFrame) {
             lastReportedFrame = currentFrame;
-            // Місце для відправки кадру на бекенд
+            // console.log("Кадр для бекенду:", currentFrame);
         }
     }
 
-    // ==========================================
-    // ЛОГІКА СЛАЙДШОУ (Автоматичне відтворення)
-    // ==========================================
     function startSlideshow() {
         isPlaying = true;
-        if (playPauseImg) playPauseImg.src = 'pause.png';
+        if (playPauseImg) playPauseImg.src = 'pause.png'; // Змінює картинку на паузу
         
         playInterval = setInterval(() => {
             let currentVal = parseFloat(slider.value);
             let maxVal = parseFloat(slider.max);
             
             if (currentVal >= maxVal) {
-                slider.value = slider.min; // Зациклюємо слайдшоу
+                slider.value = slider.min; 
             } else {
-                slider.value = currentVal + 1; // Крок на 1 кадр
+                slider.value = currentVal + 1; 
             }
             updateSunPosition();
         }, 500); 
@@ -93,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function pauseSlideshow() {
         if (isPlaying) {
             isPlaying = false;
-            if (playPauseImg) playPauseImg.src = 'play.png';
+            if (playPauseImg) playPauseImg.src = 'play.png'; // Змінює картинку на плей
             clearInterval(playInterval);
         }
     }
@@ -105,17 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================
-    // ЛОГІКА РУЧНОГО КЕРУВАННЯ
-    // ==========================================
-    
-    // Перетягування мишкою
     slider.addEventListener('input', () => {
         pauseSlideshow();
         updateSunPosition();
     });
 
-    // Стрілочка НАЗАД
     if (btnPrev) {
         btnPrev.addEventListener('click', () => {
             pauseSlideshow(); 
@@ -127,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Стрілочка ВПЕРЕД
     if (btnNext) {
         btnNext.addEventListener('click', () => {
             pauseSlideshow(); 
@@ -139,16 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Ініціалізація
     window.addEventListener('resize', updateSunPosition);
     updateSunPosition();
-});
-
-// Кнопка детектора
-document.getElementById('detect-btn')?.addEventListener('click', function() {
-  const loader = document.getElementById('space-loader');
-  if (loader) {
-      loader.classList.add('active');
-      setTimeout(() => loader.classList.remove('active'), 3000);
-  }
 });
