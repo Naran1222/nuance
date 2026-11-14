@@ -66,4 +66,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Встановлюємо сонечко на старт при завантаженні сторінки
     updateSunPosition();
+    // Находим центральную кнопку и картинку внутри нее
+const playPauseBtn = document.getElementById('btn-play-pause');
+const playPauseImg = document.getElementById('play-pause-img');
+
+// Переменная состояния плеера
+let isPlaying = false;
+
+playPauseBtn.addEventListener('click', () => {
+    // Меняем статус на противоположный
+    isPlaying = !isPlaying;
+    
+    if (isPlaying) {
+        // Если играет -> показываем паузу
+        playPauseImg.src = 'pause.png';
+    } else {
+        // Если на паузе -> показываем плей
+        playPauseImg.src = 'play.png';
+    }
+});
 });

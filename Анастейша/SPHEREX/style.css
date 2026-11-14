@@ -129,3 +129,47 @@ body {
     border-radius: 4px;
     border: 1px solid rgba(0, 229, 255, 0.3);
 }
+/* ========================================= */
+/* Стили для кнопок управления плеером       */
+/* ========================================= */
+.playback-controls {
+    display: flex;
+    justify-content: center; /* Центрируем кнопки по горизонтали */
+    align-items: center;     /* Выравниваем по вертикали */
+    gap: 40px;               /* Расстояние между кнопками */
+    margin-top: 15px;        /* Отступ от дуги сверху */
+    margin-bottom: 5px;
+    z-index: 20;             /* Чтобы кнопки были поверх других слоев */
+    position: relative;
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    /* Применяем твой курсор на кнопки */
+    cursor: url('изображение_2026-11-14_132931772.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Эффект увеличения и свечения при наведении */
+.control-btn:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)); /* Голубое свечение */
+}
+
+/* Эффект "нажатия" */
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+/* Настройки размера самих иконок */
+.control-btn img {
+    height: 35px; /* Задай нужный размер иконок */
+    width: auto;
+    object-fit: contain;
+}
