@@ -145,7 +145,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="SPHEREx: кроки 1-3 + кольорові композити")
     parser.add_argument("--target", default="M101", help="назва об'єкта або 'RA Dec' у градусах")
-    parser.add_argument("--size", type=float, default=0.1, help="розмір вирізки, градуси")
+    parser.add_argument("--size", type=float, default=0.15, help="розмір вирізки, градуси")
     parser.add_argument("--band", default="D2", help="одна або декілька смуг D1..D6 (наприклад 'D1,D3,D5') або 'all'")
     parser.add_argument("--bands", default=None, help="довільний список смуг через кому (має пріоритет над --band)")
     parser.add_argument("--limit", type=int, default=DEFAULT_WEB_LIMIT,

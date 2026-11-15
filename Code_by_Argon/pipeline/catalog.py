@@ -508,24 +508,13 @@ def _level1_tap_search(
     bands_list: Optional[List[str]],
     verbose: bool = True,
 ) -> Table:
-    """Рівень 1: TAP/sync запит до spherex.artifact, при збої — коротка спроба через pyvo run_sync."""
+    """Рівень 1: Швидкий TAP/sync запит з жорстким таймаутом 10 секунд."""
     query = _build_tap_artifact_query(coord, size_deg, bands_list)
     try:
-        return _query_tap_sync(query, timeout=(8, 22))
+        return _query_tap_sync(query, timeout=(5, 10))
     except Exception as sync_exc:
-        err_str = str(sync_exc)
-        if "502" in err_str or "503" in err_str or "504" in err_str:
-            set_irsa_ibe_unavailable(True)
-            raise RuntimeError(f"IRSA TAP/sync повернув помилку проксі: {sync_exc}") from sync_exc
-
-        try:
-            import pyvo
-            service = pyvo.dal.TAPService("https://irsa.ipac.caltech.edu/TAP", session=get_http_session())
-            return service.run_sync(query).to_table()
-        except Exception as pyvo_exc:
-            if "502" in str(pyvo_exc) or "503" in str(pyvo_exc):
-                set_irsa_ibe_unavailable(True)
-            raise RuntimeError(f"IRSA TAP недоступний: {pyvo_exc}") from pyvo_exc
+        set_irsa_ibe_unavailable(True)
+        raise RuntimeError(f"IRSA TAP не відповів за 10 с: {sync_exc}") from sync_exc
 
 
 # --------------------------------------------------------------------------
@@ -965,8 +954,7 @@ def _level3_s3_direct_search(
     verbose: bool = True,
 ) -> Table:
     """
-    Рівень 3: Пошук безпосередньо в AWS S3 (nasa-irsa-spherex) та локальних індексах,
-    коли сервери IRSA (TAP і SIAv2) недоступні (502/503).
+    Рівень 3: Швидкий обмежений пошук на AWS S3 (макс. ~15-20 секунд) з виводом прогресу.
     """
     set_irsa_ibe_unavailable(True)
     ra, dec = float(coord.ra.deg), float(coord.dec.deg)
@@ -982,7 +970,8 @@ def _level3_s3_direct_search(
         if not np.isfinite(r_ra) or not np.isfinite(r_dec) or not np.isfinite(t_min):
             continue
         sep = float(coord.separation(SkyCoord(r_ra * u.deg, r_dec * u.deg, frame="icrs")).deg)
-        if sep <= 2.5:
+        tol = 0.05 if rec.get("exact_target") else 2.3
+        if sep <= tol:
             matched_Near.append(rec)
             m_wk = re.match(r"^(.+?20\d{2}W\d{2}[^/]*/)", str(rec.get("s3_key", "")))
             if m_wk:
@@ -991,37 +980,46 @@ def _level3_s3_direct_search(
     found_bands = {rec["band"] for rec in matched_Near if rec.get("band") in wanted_bands}
     if found_bands != wanted_bands:
         if verbose:
-            print(f"  [catalog] сканування експозицій на AWS S3 для RA={ra:.4f}, Dec={dec:+.4f}...")
+            print(f"  [catalog] пошук тижнів на AWS S3 для RA={ra:.4f}, Dec={dec:+.4f}...", flush=True)
         week_prefixes = _discover_s3_week_prefixes(records)
+        if verbose:
+            print(f"  [catalog] знайдено тижнів у бакеті: {len(week_prefixes)}", flush=True)
+
         ecl = coord.geocentrictrueecliptic
         target_lon = float(ecl.lon.deg)
         target_lat = float(ecl.lat.deg)
 
-        scored_ep1, scored_ep2 = [], []
-        for wp in week_prefixes:
-            m = re.search(r"(20\d{2})W(\d{2})", wp)
-            if not m:
-                continue
-            week_num = int(m.group(2))
-            doy = (week_num - 1) * 7 + 4
-            sun_lon = ((doy - 80.0) / 365.25 * 360.0) % 360.0
-            dlon_rad = np.radians(target_lon - sun_lon)
-            cos_elong = abs(np.cos(np.radians(target_lat)) * np.cos(dlon_rad))
-            if np.sin(dlon_rad) >= 0:
-                scored_ep1.append((cos_elong, wp))
-            else:
-                scored_ep2.append((cos_elong, wp))
+        # Біля полюсів екліптики (|lat| > 75°) супутник знімає поле КОЖНОГО тижня — беремо 2 останні тижні
+        if abs(target_lat) > 75.0 and week_prefixes:
+            target_weeks = list(dict.fromkeys(known_target_weeks + week_prefixes[-2:]))
+        else:
+            scored_ep1, scored_ep2 = [], []
+            for wp in week_prefixes:
+                m = re.search(r"(20\d{2})W(\d{2})", wp)
+                if not m:
+                    continue
+                week_num = int(m.group(2))
+                doy = (week_num - 1) * 7 + 4
+                sun_lon = ((doy - 80.0) / 365.25 * 360.0) % 360.0
+                dlon_rad = np.radians(target_lon - sun_lon)
+                cos_elong = abs(np.cos(np.radians(target_lat)) * np.cos(dlon_rad))
+                if np.sin(dlon_rad) >= 0:
+                    scored_ep1.append((cos_elong, wp))
+                else:
+                    scored_ep2.append((cos_elong, wp))
 
-        scored_ep1.sort(key=lambda x: x[0])
-        scored_ep2.sort(key=lambda x: x[0])
-        target_weeks = list(dict.fromkeys(
-            known_target_weeks + [wp for _, wp in scored_ep1[:6]] + [wp for _, wp in scored_ep2[:6]]
-        ))
+            scored_ep1.sort(key=lambda x: x[0])
+            scored_ep2.sort(key=lambda x: x[0])
+            target_weeks = list(dict.fromkeys(
+                known_target_weeks + [wp for _, wp in scored_ep1[:2]] + [wp for _, wp in scored_ep2[:2]]
+            ))
 
         dense_exposures: List[List[str]] = []
         for wp in target_weeks:
+            if verbose:
+                print(f"  [catalog] лістинг файлів у {wp}...", flush=True)
             try:
-                all_keys = _list_fits_in_prefix(wp, max_pages=60)
+                all_keys = _list_fits_in_prefix(wp, max_pages=15)
             except Exception:
                 continue
             if not all_keys:
@@ -1036,14 +1034,19 @@ def _level3_s3_direct_search(
             if not exp_list:
                 continue
 
-            coarse_indices = list(range(0, len(exp_list), 8))
+            # Обмежуємо грубий пошук максимум 120 точками на тиждень, щоб ніколи не зависати
+            step = max(1, len(exp_list) // 120)
+            coarse_indices = list(range(0, len(exp_list), step))
             coarse_map = {
                 next((u_str for u_str in exp_list[i] if "D1" in Path(u_str).name or "D2" in Path(u_str).name), exp_list[i][0]): i
                 for i in coarse_indices
             }
 
+            if verbose:
+                print(f"  [catalog] швидкий скан {len(coarse_map)} опорних кадрів у {wp}...", flush=True)
+
             hit_indices = []
-            with ThreadPoolExecutor(max_workers=32) as pool:
+            with ThreadPoolExecutor(max_workers=16) as pool:
                 futures = {pool.submit(read_s3_fits_header_fast, u_str, False): idx for u_str, idx in coarse_map.items()}
                 for fut in as_completed(futures):
                     idx = futures[fut]
@@ -1052,18 +1055,16 @@ def _level3_s3_direct_search(
                         sep = float(coord.separation(
                             SkyCoord(meta["s_ra"] * u.deg, meta["s_dec"] * u.deg, frame="icrs")
                         ).deg)
-                        if sep <= 15.0:
+                        if sep <= 12.0:
                             hit_indices.append(idx)
 
             selected_idx_set = set()
             for h_idx in hit_indices:
-                for j in range(max(0, h_idx - 85), min(len(exp_list), h_idx + 86)):
+                for j in range(max(0, h_idx - 25), min(len(exp_list), h_idx + 26)):
                     selected_idx_set.add(j)
 
-            if not selected_idx_set:
-                selected_idx_set.update(range(0, len(exp_list), 4))
-
-            for j in sorted(selected_idx_set):
+            # Жорсткий запобіжник: не більше 250 кандидатів на тиждень
+            for j in sorted(selected_idx_set)[:250]:
                 dense_exposures.append(exp_list[j])
 
         need_short = bool(wanted_bands & {"SPHEREx-D1", "SPHEREx-D2", "SPHEREx-D3"})
@@ -1078,9 +1079,12 @@ def _level3_s3_direct_search(
             if need_long and long_urls:
                 probe_to_group[long_urls[0]] = long_urls
 
+        if verbose:
+            print(f"  [catalog] точна перевірка {len(probe_to_group)} напівполів...", flush=True)
+
         new_records: List[dict] = []
         margin_px = 24
-        with ThreadPoolExecutor(max_workers=32) as pool:
+        with ThreadPoolExecutor(max_workers=16) as pool:
             futures = {pool.submit(read_s3_fits_header_fast, p_url, True): p_url for p_url in probe_to_group}
             for fut in as_completed(futures):
                 p_url = futures[fut]

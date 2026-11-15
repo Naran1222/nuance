@@ -1,0 +1,18 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: uri, datatype: string}
+# - {name: mjd, datatype: float64}
+# - {name: band, datatype: string}
+# meta: !!omap
+# - {ra_deg: 83.82}
+# - {dec_deg: -5.38}
+# - {size_deg: 0.15}
+# - {band: SPHEREx-D1}
+# - bands: [SPHEREx-D1]
+# schema: astropy-2.0
+uri mjd band
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/1/level2_2025W36_2B_0727_1D1_spx_l2b-v27-2026-234.fits?center=83.820000,-5.380000d&size=0.15 60925.997709499 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/1/level2_2025W36_2B_0727_2D1_spx_l2b-v27-2026-234.fits?center=83.820000,-5.380000d&size=0.15 60925.999201756 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/1/level2_2025W36_2B_0728_1D1_spx_l2b-v27-2026-234.fits?center=83.820000,-5.380000d&size=0.15 60926.000960495 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/1/level2_2025W36_2B_0728_2D1_spx_l2b-v27-2026-234.fits?center=83.820000,-5.380000d&size=0.15 60926.002452752 SPHEREx-D1

@@ -1,0 +1,65 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: uri, datatype: string}
+# - {name: mjd, datatype: float64}
+# - {name: band, datatype: string}
+# meta: !!omap
+# - {ra_deg: 210.802429}
+# - {dec_deg: 54.34875}
+# - {size_deg: 0.35}
+# - {band: D1-D2-D3}
+# - bands: [SPHEREx-D1, SPHEREx-D2, SPHEREx-D3]
+# schema: astropy-2.0
+uri mjd band
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W22_2B/l2b-v27-2026-200/3/level2_2025W22_2B_0019_1D3_spx_l2b-v27-2026-200.fits?center=210.802429,54.348750d&size=0.35 60824.601246918 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W22_2B/l2b-v27-2026-200/3/level2_2025W22_2B_0140_1D3_spx_l2b-v27-2026-200.fits?center=210.802429,54.348750d&size=0.35 60825.281323608 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W22_2B/l2b-v27-2026-200/1/level2_2025W22_2B_0323_3D1_spx_l2b-v27-2026-200.fits?center=210.802429,54.348750d&size=0.35 60826.368412509 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W22_2B/l2b-v27-2026-200/1/level2_2025W22_2B_0323_4D1_spx_l2b-v27-2026-200.fits?center=210.802429,54.348750d&size=0.35 60826.369922532 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W22_2B/l2b-v27-2026-200/3/level2_2025W22_2B_0360_2D3_spx_l2b-v27-2026-200.fits?center=210.802429,54.348750d&size=0.35 60826.581538284 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W23_2B/l2b-v27-2026-201/1/level2_2025W23_2B_0528_1D1_spx_l2b-v27-2026-201.fits?center=210.802429,54.348750d&size=0.35 60833.979988585 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W23_2B/l2b-v27-2026-201/1/level2_2025W23_2B_0544_1D1_spx_l2b-v27-2026-201.fits?center=210.802429,54.348750d&size=0.35 60834.045043724 SPHEREx-D1
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0743_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61009.675634986 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/3/level2_2025W49_2A_0059_1D3_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61013.74494252 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0426_1D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61015.522928469 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0426_2D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61015.524420738 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0426_3D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61015.525912983 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0426_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61015.527405252 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0544_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.012849928 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0650_1D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.473974395 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0650_2D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.475466652 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0650_3D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.476958909 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0650_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.478451155 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0707_1D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.743450703 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0707_2D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.74494296 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0707_3D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.746435217 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0707_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.747927474 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0756_3D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.950412208 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W49_2A/l2b-v27-2026-209/2/level2_2025W49_2A_0756_4D2_spx_l2b-v27-2026-209.fits?center=210.802429,54.348750d&size=0.35 61016.951904465 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0072_1D2_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61020.747294476 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0072_2D2_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61020.748786745 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0072_3D2_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61020.75027899 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0072_4D2_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61020.751771236 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/2/level2_2025W50_2A_0129_1D2_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61020.951982115 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0543_1D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.51490605 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0543_2D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.516398307 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0543_3D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.517890553 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0543_4D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.51938281 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0559_1D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.584153782 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0559_2D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.585646027 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/3/level2_2025W50_2A_0559_3D3_spx_l2b-v27-2026-210.fits?center=210.802429,54.348750d&size=0.35 61022.587138296 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0164_1D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.287551282 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0164_2D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.289043539 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0164_3D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.290553562 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0164_4D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.292045819 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0191_1D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.422760217 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0191_2D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.424252486 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0191_3D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.425744731 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0191_4D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61028.427236988 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0528_1D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61030.062392879 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0545_1D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61030.1208573 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0545_2D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61030.122349557 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/3/level2_2025W51_2A_0545_3D3_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61030.123841803 SPHEREx-D3
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W51_2A/l2b-v27-2026-211/2/level2_2025W51_2A_0712_3D2_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61030.862614511 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W52_2A/l2b-v27-2026-211/2/level2_2025W52_2A_0055_1D2_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61034.727909546 SPHEREx-D2
+https://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/level2/2025W52_2A/l2b-v27-2026-211/2/level2_2025W52_2A_0324_2D2_spx_l2b-v27-2026-211.fits?center=210.802429,54.348750d&size=0.35 61036.086127856 SPHEREx-D2

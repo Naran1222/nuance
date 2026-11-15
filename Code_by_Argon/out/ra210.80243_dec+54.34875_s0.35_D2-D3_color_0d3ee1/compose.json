@@ -1,0 +1,83 @@
+{
+  "kind": "color_composite",
+  "color_mode": "rgb",
+  "target": {
+    "ra_deg": 210.802429,
+    "dec_deg": 54.34875
+  },
+  "query": {
+    "size_deg": 0.35,
+    "bands": [
+      "D2",
+      "D3"
+    ]
+  },
+  "image": {
+    "npix": 256,
+    "fov_deg": 0.24006275221283283,
+    "pixel_scale_arcsec": 3.3758824529929616,
+    "orientation": "north up, east left",
+    "format": "png",
+    "alpha": false,
+    "y_png_from_array_row": "y_png = npix - 1 - row",
+    "channels": [
+      "R",
+      "G",
+      "B"
+    ]
+  },
+  "channels": {
+    "R": {
+      "wavelength_um": [
+        1.976334171945354,
+        2.38860092652357
+      ],
+      "n_frames": 8
+    },
+    "G": {
+      "wavelength_um": [
+        1.2674988802400178,
+        1.6168704943344012
+      ],
+      "n_frames": 8
+    },
+    "B": {
+      "wavelength_um": [
+        1.100776120532888,
+        1.2438075844082752
+      ],
+      "n_frames": 9
+    }
+  },
+  "deep": {
+    "file": "deep_rgb.png",
+    "n_frames": 25
+  },
+  "epochs": [
+    {
+      "index": 0,
+      "file": "epoch_00_rgb.png",
+      "date_start": "2025-12-06",
+      "date_end": "2025-12-13",
+      "mjd_start": 61015.522928469,
+      "mjd_end": 61022.585646027,
+      "n_frames": {
+        "R": 6,
+        "G": 8,
+        "B": 9
+      }
+    }
+  ],
+  "processing": {
+    "coadd": "median",
+    "sky_pedestal": "10th_percentile",
+    "epoch_gap_days": 45.0,
+    "max_epoch_days": null,
+    "stretch": "noise-anchored asinh (a=22, sat=1.6, gamma=0.75)",
+    "false_color": "longest wavelengths = red, shortest = blue"
+  },
+  "sources": [
+    "ra210.80243_dec+54.34875_s0.35_D1-D2-D3_n100_px256_bilinear"
+  ],
+  "created_utc": "2026-11-15 17:11:41"
+}
