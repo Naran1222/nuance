@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     const detectBtn = document.getElementById('detect-btn');
     const loader = document.getElementById('space-loader');
-    const sidebar = document.getElementById('sidebar'); // Або document.querySelector('.sidebar')
+    const sidebar = document.getElementById('sidebar');
     const mainViewport = document.getElementById('main-viewport');
 
     if (detectBtn) {
@@ -29,12 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     mainViewport.classList.remove('hidden');
                 }
 
-                // ВИПРАВЛЕНО: Використовуємо правильні ID з HTML
-                const valTarget = document.getElementById('val-coords'); // Перевірте, який ID у вас в HTML для координат
-                if (valTarget) valTarget.textContent = "M101/RA, DEC = 210,8, 54,35"; 
+                // ВСТАВЛЯЄМО ДАНІ, ЩО ВІДПОВІДАЮТЬ ВАШОМУ МАКЕТУ
+                // 1. Дата
+                const valDate = document.getElementById('val-date');
+                if (valDate) valDate.textContent = "March 2025"; 
 
-                const valBand = document.getElementById('val-band');
-                if (valBand) valBand.textContent = "'D2' 'D3,D4' 'all'";  
+                // 2. Довжина хвилі
+                const valWavelengths = document.getElementById('val-wavelengths');
+                if (valWavelengths) valWavelengths.textContent = "0.75 - 5.0 μm";  
+
+                // Якщо у вас залишились старі поля (наприклад, координати), вони оновляться тут:
+                const valCoords = document.getElementById('val-coords');
+                if (valCoords) valCoords.textContent = "M101/RA, DEC = 210,8, 54,35"; 
 
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize')); 
@@ -92,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentFrame !== lastReportedFrame) {
                 lastReportedFrame = currentFrame;
+                // БЕКЕНД: запит на нову картинку
             }
         }
 
@@ -159,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 3. ЛОГІКА КНОПОК "НАЗАД" ТА "ВПЕРЕД" (Без дублювання)
+    // 3. ЛОГІКА КНОПОК "НАЗАД" ТА "ВПЕРЕД"
     // ==========================================
     const btnGoBack = document.getElementById('btn-go-back');
     const btnGoForward = document.getElementById('btn-go-forward');
@@ -199,8 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
         colorToggleCheckbox.addEventListener('change', function() {
             if (this.checked) {
                 console.log("Запит на бекенд: завантажити КОЛЬОРОВУ картинку...");
+                // БЕКЕНД: Логіка для кольору
             } else {
                 console.log("Запит на бекенд: завантажити ЧОРНО-БІЛУ картинку...");
+                // БЕКЕНД: Логіка для ч/б
             }
         });
     }
