@@ -720,7 +720,7 @@ body {
 
 .description-info-frame {
     position: absolute;
-    right: 10%; /* Трохи зменшив відступ, бо рамка стала ширшою */
+    right: 5%; /* Трохи зменшив відступ, бо рамка стала ширшою */
     top: 45%;  /* Ставимо по центру */
     transform: translateY(-50%);
     
