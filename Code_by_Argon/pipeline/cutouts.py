@@ -258,7 +258,7 @@ def _crop_hdul_to_file(
         mode="partial",
         fill_value=np.nan,
     )
-    if np.isfinite(cut_img.data).mean() < 0.20:
+    if np.isfinite(cut_img.data).mean() < 0.60:
         return False
 
     x0_orig = float(cut_img.xmin_original)

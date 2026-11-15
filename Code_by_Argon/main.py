@@ -78,7 +78,7 @@ def run(
     print(f"Об'єкт: {target}  ->  RA={coord.ra.deg:.5f}°, Dec={coord.dec.deg:+.5f}°  |  Смуги: {bands_label}")
 
     print("\nКрок 1. Пошук знімків")
-    table = find_exposures(coord, size_deg=size_deg, bands=selected_bands, use_cache=use_cache)
+    table = find_exposures(coord, size_deg=size_deg, band=None, bands=selected_bands, use_cache=use_cache)
     if len(table) == 0:
         print("Знімків не знайдено.")
         return table, [], None

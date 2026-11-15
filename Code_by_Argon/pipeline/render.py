@@ -16,9 +16,13 @@ import numpy as np
 from astropy.coordinates import SkyCoord
 from astropy.time import Time
 from astropy.wcs import WCS
+from astropy.convolution import Gaussian2DKernel, interpolate_replace_nans
+from astropy.stats import SigmaClip, sigma_clipped_stats
+from astropy.visualization import AsinhStretch, ImageNormalize, PercentileInterval
+from photutils.background import Background2D, MedianBackground
 from PIL import Image, ImageDraw
 from reproject import reproject_interp
-from scipy.ndimage import maximum_filter, median_filter
+from scipy.ndimage import median_filter
 
 try:
     import cv2
@@ -82,45 +86,18 @@ def _reproject(array, wcs_in, wcs_out, npix, order="bilinear"):
     return np.array(out, dtype=np.float32)
 
 
-def _clean_cosmic_rays_preserve_nans(img: np.ndarray, sigma_thresh: float = 7.0) -> np.ndarray:
-    """
-    Прибирає поодинокі 1-піксельні викиди космічних променів (за порогом 7 sigma
-    відносно локальної медіани 3x3) до репроєкції:
-      - Не змінює жодного замаскованого NaN-пікселя з FLAGS (для сумісності з TRANSIENT/OUTLIER).
-      - Зберігає реальні та синтетичні зорі (де сусідні пікселі в межах PSF також мають сигнал).
-    """
-    nan_mask = ~np.isfinite(img)
-    valid = ~nan_mask
-    if valid.sum() < 25:
-        return img
-
-    med_bg = float(np.median(img[valid]))
-    filled = np.where(valid, img, med_bg).astype(np.float32)
+def clean_cosmic_rays(flux: np.ndarray, sigma_thresh: float = 7.0) -> np.ndarray:
+    """Замінює поодинокі 1-піксельні гарячі та биті пікселі локальною медіаною, зберігаючи зірки."""
+    filled = np.nan_to_num(flux, nan=np.nanmedian(flux))
     med3 = median_filter(filled, size=3)
     residual = filled - med3
-
-    res_valid = residual[valid]
-    res_med = float(np.median(res_valid))
-    mad = float(np.median(np.abs(res_valid - res_med)))
-    sigma = max(1.4826 * mad, 1e-4)
-
-    # Перевіряємо максимальний сигнал у 8 сусідах (без самого центрального пікселя):
-    # у справжньої зорі (FWHM ~ 2 пікселі) сусіди теж підняті над медіаною, а в 1-піксельного спалаху — ні.
-    footprint_ring = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=bool)
-    max_neighbor_excess = maximum_filter(filled - med3, footprint=footprint_ring, mode="nearest")
-
-    spikes = (
-        valid
-        & (residual > sigma_thresh * sigma)
-        & (residual > 4.0 * np.maximum(max_neighbor_excess, 0.0))
-    )
-    if not spikes.any():
-        return img
-
-    out = img.copy()
-    out[spikes] = med3[spikes]
-    out[nan_mask] = np.nan
-    return out
+    _, _, std = sigma_clipped_stats(residual, sigma=3.0)
+    if not np.isfinite(std) or std <= 0:
+        return flux
+    outliers = np.abs(residual) > (sigma_thresh * std)
+    cleaned = flux.copy()
+    cleaned[outliers] = med3[outliers]
+    return cleaned
 
 
 def _fill_input(img: np.ndarray) -> np.ndarray:
@@ -150,24 +127,37 @@ def align_frames(
 
     images, covers, kept = [], [], []
     skipped = 0
+    sigma_clip = SigmaClip(sigma=3.0)
     for f in frames:
-        img = np.array(f["image"], dtype=np.float32)
+        img = np.array(f["image"], dtype=np.float64)
         zodi = f.get("zodi")
         if subtract_zodi and zodi is not None:
             img = img - zodi
-        bad = (np.asarray(f["flags"]).astype(np.int64) & mask_value) != 0
-        img[bad] = np.nan
+
+        # Маскуємо лише критичні апаратні збої, не чіпаючи яскраві ядра туманностей і зір
+        if mask_outliers:
+            bad = (np.asarray(f["flags"]).astype(np.int64) & (1 << OUTLIER_BIT)) != 0
+            img[bad] = np.nan
         img[~np.isfinite(img)] = np.nan
 
-        img = _clean_cosmic_rays_preserve_nans(img, sigma_thresh=7.0)
-
-        if order == "bilinear":
-            sci = _reproject(img, f["wcs"], w_out, npix)
+        if np.isfinite(img).sum() >= 64:
+            bkg = Background2D(
+                img,
+                box_size=(22, 22),
+                filter_size=(3, 3),
+                sigma_clip=sigma_clip,
+                bkg_estimator=MedianBackground(),
+                coverage_mask=~np.isfinite(img),
+            )
+            flat_flux = img - bkg.background
         else:
-            sci = _reproject(_fill_input(img), f["wcs"], w_out, npix, order)
-            bad_out = _reproject(np.isnan(img).astype(np.float32), f["wcs"], w_out, npix) > 0.01
-            sci[bad_out] = np.nan
-        cov = np.isfinite(_reproject(np.ones(img.shape, dtype=np.float32), f["wcs"], w_out, npix))
+            flat_flux = img
+
+        healed_flux = interpolate_replace_nans(flat_flux, Gaussian2DKernel(x_stddev=1.0))
+        clean_flux = clean_cosmic_rays(healed_flux, sigma_thresh=7.0).astype(np.float32)
+
+        sci = _reproject(clean_flux, f["wcs"], w_out, npix, order=order)
+        cov = np.isfinite(_reproject(np.ones(clean_flux.shape, dtype=np.float32), f["wcs"], w_out, npix))
 
         if cov.mean() < min_coverage:
             skipped += 1
@@ -195,22 +185,20 @@ def _fill_holes(gray: np.ndarray, holes: np.ndarray) -> np.ndarray:
     return out
 
 
-def stretch_to_uint8(sci: np.ndarray, coverage: np.ndarray, lo_pct=1.0, hi_pct=99.6, a=18.0):
+def stretch_to_uint8(sci: np.ndarray, coverage: np.ndarray, pct: float = 99.2, a: float = 0.04):
     valid = np.isfinite(sci)
     alpha = np.where(coverage, 255, 0).astype(np.uint8)
     if valid.sum() < 10:
         return np.zeros(sci.shape, dtype=np.uint8), alpha
 
-    lo, hi = np.percentile(sci[valid], (lo_pct, hi_pct))
-    if not hi > lo:
-        hi = lo + 1e-6
-    x = np.clip((np.where(valid, sci, lo) - lo) / (hi - lo), 0.0, 1.0)
-    x = np.arcsinh(a * x) / np.arcsinh(a)
-    gray = (x * 255.0).astype(np.uint8)
+    vmin, vmax = PercentileInterval(pct).get_limits(sci[valid])
+    vmin = min(vmin, -0.02 * (vmax - vmin))
+    if not vmax > vmin:
+        vmax = vmin + 1e-6
 
-    holes = coverage & ~valid
-    if holes.any():
-        gray = _fill_holes(gray, holes)
+    norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=AsinhStretch(a=a), clip=True)
+    filled = np.nan_to_num(sci, nan=vmin)
+    gray = (np.asarray(norm(filled)) * 255.0).astype(np.uint8)
     return gray, alpha
 
 

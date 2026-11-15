@@ -23,6 +23,9 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
+from astropy.convolution import Gaussian2DKernel, interpolate_replace_nans
+from astropy.stats import sigma_clipped_stats
+from astropy.visualization import AsinhStretch, ImageNormalize
 from PIL import Image, ImageDraw
 from scipy.ndimage import label, median_filter
 
@@ -112,7 +115,7 @@ def assign_channels(wl: np.ndarray, edges) -> np.ndarray:
 
 
 def _fill_internal_nans(img: np.ndarray) -> np.ndarray:
-    """Заповнює внутрішні дірки (пересвічені ядра зір), не чіпаючи зовнішні краї кадру."""
+    """Заповнює внутрішні NaN гаусовим ядром (як у process.py), не чіпаючи зовнішні краї кадру."""
     nan_mask = ~np.isfinite(img)
     if not nan_mask.any() or nan_mask.all():
         return img
@@ -126,53 +129,24 @@ def _fill_internal_nans(img: np.ndarray) -> np.ndarray:
     if not internal_holes.any():
         return img
 
+    healed = interpolate_replace_nans(img.astype(np.float64), Gaussian2DKernel(x_stddev=1.0))
     out = img.copy()
-    med = float(np.nanmedian(out))
-    filled_base = np.where(np.isfinite(out), out, med).astype(np.float32)
-
-    if cv2 is not None:
-        inpainted = cv2.inpaint(filled_base, internal_holes.astype(np.uint8) * 255, 7, cv2.INPAINT_TELEA)
-        out[internal_holes] = inpainted[internal_holes]
-    else:
-        work = out.copy()
-        for _ in range(15):
-            rem = internal_holes & ~np.isfinite(work)
-            if not rem.any():
-                break
-            padded = np.pad(work, 1, constant_values=np.nan)
-            neighbors = np.stack([
-                padded[:-2, :-2], padded[:-2, 1:-1], padded[:-2, 2:],
-                padded[1:-1, :-2],                   padded[1:-1, 2:],
-                padded[2:, :-2],  padded[2:, 1:-1],  padded[2:, 2:],
-            ])
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", RuntimeWarning)
-                fill_vals = np.nanmean(neighbors, axis=0)
-            update = rem & np.isfinite(fill_vals)
-            work[update] = fill_vals[update]
-        out[internal_holes] = np.where(np.isfinite(work[internal_holes]), work[internal_holes], med)
+    out[internal_holes] = healed[internal_holes].astype(np.float32)
     return out
 
 
-def _despeckle(img: np.ndarray, threshold_sigma: float = 6.0) -> np.ndarray:
-    """Прибирає поодинокі 1-піксельні викиди космічних променів, не чіпаючи реальні зорі."""
-    finite = np.isfinite(img)
-    if finite.sum() < 25:
+def _despeckle(img: np.ndarray, threshold_sigma: float = 7.0) -> np.ndarray:
+    """Прибирає як гарячі, так і чорні биті пікселі (двосторонній sigma-фільтр із process.py)."""
+    filled = np.nan_to_num(img, nan=np.nanmedian(img))
+    med3 = median_filter(filled, size=3)
+    residual = filled - med3
+    _, _, std = sigma_clipped_stats(residual, sigma=3.0)
+    if not np.isfinite(std) or std <= 0:
         return img
-    med_val = float(np.median(img[finite]))
-    filled = np.where(finite, img, med_val)
-    local_med = median_filter(filled, size=3)
-    diff = filled - local_med
-    mad = float(np.median(np.abs(diff[finite])))
-    sigma = 1.4826 * mad
-    if sigma <= 0:
-        return img
-    spikes = finite & (diff > threshold_sigma * sigma)
-    if not spikes.any():
-        return img
-    out = img.copy()
-    out[spikes] = local_med[spikes]
-    return out
+    outliers = np.abs(residual) > (threshold_sigma * std)
+    cleaned = img.copy()
+    cleaned[outliers] = med3[outliers]
+    return cleaned
 
 
 def coadd(images: np.ndarray, method: str = "median") -> Optional[np.ndarray]:
@@ -191,50 +165,41 @@ def coadd(images: np.ndarray, method: str = "median") -> Optional[np.ndarray]:
     return res
 
 
-def _limits(img: np.ndarray, lo_pct=2.0, hi_pct=98.2):
+def _limits(img: np.ndarray, lo_pct: float = 1.0, hi_pct: float = 99.4):
+    """Межі контрасту 1.0%..99.4% як у save_false_color_rgb_comparison (process.py)."""
     valid = np.isfinite(img)
     if valid.sum() < 10:
         return 0.0, 1.0
     vals = img[valid]
-    med = float(np.median(vals))
-    mad = float(np.median(np.abs(vals - med)))
-    sigma = 1.4826 * mad
     lo = float(np.percentile(vals, lo_pct))
-    if sigma > 0:
-        lo = max(lo, med - 1.0 * sigma)
     hi = float(np.percentile(vals, hi_pct))
-    if sigma > 0:
-        hi = min(hi, med + 45.0 * sigma)
-        hi = max(hi, med + 8.0 * sigma)
     if not hi > lo:
-        hi = lo + 1e-6
-    return float(lo), float(hi)
+        hi = lo + 1.0
+    return lo, hi
 
 
-def to_rgb8(channels: Sequence[np.ndarray], limits: Sequence, a: float = 22.0,
-            saturation: float = 1.6, gamma: float = 0.75) -> np.ndarray:
+def to_rgb8(channels: Sequence[np.ndarray], limits: Sequence, a: float = 0.06,
+            saturation: float = 1.25) -> np.ndarray:
     """
-    Три канали (R, G, B) -> uint8 (H, W, 3) із яскравою промальовкою слабких рукавів галактик,
-    збереженням кольору зір та обнуленням зон неповного перекриття.
+    Незалежний поканальний AsinhStretch(a=0.06) у стилі process.py:
+    глибокий чорний фон без сірої вуалі та максимальна насиченість спектральних каналів.
     """
-    cleaned = [_fill_internal_nans(np.asarray(img, dtype=np.float32)) for img in channels]
+    cleaned = [_fill_internal_nans(np.asarray(img, dtype=np.float64)) for img in channels]
     valid = np.all([np.isfinite(img) for img in cleaned], axis=0)
 
-    x = np.stack([np.clip((np.nan_to_num(img, nan=lo) - lo) / (hi - lo + 1e-12), 0.0, None)
-                  for img, (lo, hi) in zip(cleaned, limits)], axis=-1)
-    intensity = x.mean(axis=-1)
-    safe = np.where(intensity > 1e-6, intensity, 1.0)
-    scale = np.where(intensity > 1e-6, np.arcsinh(a * intensity) / (a * safe), 0.0)
-    rgb = x * scale[..., None]
+    rgb_layers = []
+    for img, (vmin, vmax) in zip(cleaned, limits):
+        if not vmax > vmin:
+            vmax = vmin + 1.0
+        norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=AsinhStretch(a=a), clip=True)
+        clean_ch = np.where(np.isfinite(img), img, vmin)
+        rgb_layers.append(np.asarray(norm(clean_ch), dtype=np.float32))
 
-    lum = rgb.mean(axis=-1, keepdims=True)
-    rgb = np.maximum(lum + saturation * (rgb - lum), 0.0)
+    rgb = np.stack(rgb_layers, axis=-1)
 
-    peak = np.maximum(rgb.max(axis=-1), 1.0)
-    rgb = np.clip(rgb / peak[..., None], 0.0, 1.0)
-
-    if gamma != 1.0:
-        rgb = np.power(rgb, gamma)
+    if saturation != 1.0:
+        lum = rgb.mean(axis=-1, keepdims=True)
+        rgb = np.clip(lum + saturation * (rgb - lum), 0.0, 1.0)
 
     rgb[~valid] = 0.0
     return np.ascontiguousarray((rgb[::-1] * 255.0).astype(np.uint8))

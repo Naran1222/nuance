@@ -1011,7 +1011,7 @@ def _level3_s3_direct_search(
             scored_ep1.sort(key=lambda x: x[0])
             scored_ep2.sort(key=lambda x: x[0])
             target_weeks = list(dict.fromkeys(
-                known_target_weeks + [wp for _, wp in scored_ep1[:2]] + [wp for _, wp in scored_ep2[:2]]
+                known_target_weeks + [wp for _, wp in scored_ep1[:3]] + [wp for _, wp in scored_ep2[:3]]
             ))
 
         dense_exposures: List[List[str]] = []
@@ -1035,8 +1035,7 @@ def _level3_s3_direct_search(
                 continue
 
             # Обмежуємо грубий пошук максимум 120 точками на тиждень, щоб ніколи не зависати
-            step = max(1, len(exp_list) // 120)
-            coarse_indices = list(range(0, len(exp_list), step))
+            coarse_indices = list(range(0, len(exp_list), 10))
             coarse_map = {
                 next((u_str for u_str in exp_list[i] if "D1" in Path(u_str).name or "D2" in Path(u_str).name), exp_list[i][0]): i
                 for i in coarse_indices
@@ -1060,11 +1059,10 @@ def _level3_s3_direct_search(
 
             selected_idx_set = set()
             for h_idx in hit_indices:
-                for j in range(max(0, h_idx - 25), min(len(exp_list), h_idx + 26)):
+                for j in range(max(0, h_idx - 75), min(len(exp_list), h_idx + 76)):
                     selected_idx_set.add(j)
 
-            # Жорсткий запобіжник: не більше 250 кандидатів на тиждень
-            for j in sorted(selected_idx_set)[:250]:
+            for j in sorted(selected_idx_set):
                 dense_exposures.append(exp_list[j])
 
         need_short = bool(wanted_bands & {"SPHEREx-D1", "SPHEREx-D2", "SPHEREx-D3"})
@@ -1092,18 +1090,20 @@ def _level3_s3_direct_search(
                 if not meta:
                     continue
                 try:
+                    sep = float(coord.separation(
+                        SkyCoord(meta["s_ra"] * u.deg, meta["s_dec"] * u.deg, frame="icrs")
+                    ).deg)
+                    if sep > 3.5:
+                        continue
+
                     is_hit = False
                     if "wcs" in meta:
                         px, py = meta["wcs"].world_to_pixel(coord)
                         px, py = float(px), float(py)
                         if np.isfinite(px) and np.isfinite(py) and (margin_px <= px <= 2048 - margin_px) and (margin_px <= py <= 2048 - margin_px):
                             is_hit = True
-                    if not is_hit:
-                        sep = float(coord.separation(
-                            SkyCoord(meta["s_ra"] * u.deg, meta["s_dec"] * u.deg, frame="icrs")
-                        ).deg)
-                        if sep <= 2.3:
-                            is_hit = True
+                    if not is_hit and sep <= 2.3:
+                        is_hit = True
 
                     if is_hit:
                         for sib_url in probe_to_group[p_url]:
