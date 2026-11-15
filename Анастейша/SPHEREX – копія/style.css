@@ -17,7 +17,8 @@ body {
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.75); 
     
-    background-image: url('-2147483648_-216231.jpg'); 
+    /* Додано linear-gradient для затемнення */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('9d5bbf5f-1fa7-4942-8496-beeaa3488991.png'); 
     background-size: cover; 
     background-position: center; 
     background-repeat: no-repeat; 
@@ -75,10 +76,11 @@ body {
 }
   
 
-.logo {
-    font-size: 24px;
+..logo {
+    font-size: 30px;
     font-weight: 700;
     color: #FFFFFF;
+    margin-bottom: 20px;
 }
 
 .logo .sub-word {
@@ -183,11 +185,12 @@ body {
 
 /* Підписи */
 .timeline-labels {
-    width: 100%;
-    margin-top: 15px;
+   width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; 
     align-items: center;
+    margin-top: -135px; /* <--- Измените это значение. Чем меньше цифра, тем выше поднимется текст */
+    margin-bottom: 15px;
     font-size: 12px;
     color: #FFB300;
     font-family: monospace;
@@ -577,6 +580,7 @@ body {
     justify-content: space-between;
     gap: 8px; /* Відстань між кнопками */
     width: 100%;
+    margin-bottom: 15px;
 }
 
 .speed-btn {
