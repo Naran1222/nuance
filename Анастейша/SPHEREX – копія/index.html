@@ -11,9 +11,10 @@
     <!-- Основна логіка почалась -->
     <div class="app-container">
     
-        <!-- САЙДБАР (Спочатку на весь екран, потім з'їжджає вліво) -->
+       <!-- САЙДБАР (Спочатку на весь екран, потім з'їжджає вліво) -->
         <div class="sidebar expanded" id="sidebar">
             <h1 class="logo">SubStellar | SPHEREx</h1>
+            
             
             <button class="forward-action-btn hidden" id="btn-go-forward">
                 <img src="back right.png" alt="Forward">
@@ -28,7 +29,7 @@
                             FAST<br><span>(30 frames)</span>
                         </button>
                         <button class="speed-btn" data-speed="60">
-                            NORMAL<br><span>(60 frames)</span>
+                            BALANCED<br><span>(60 frames)</span>
                         </button>
                         <button class="speed-btn" data-speed="100">
                             HARD<br><span>(100 frames)</span>
@@ -91,15 +92,14 @@
     <div class="color-prompt-text">Show in colour?</div>
     
     <div class="color-prompt-icons">
-        <!-- Нова структура для чекбокса -->
-        <label class="custom-checkbox">
-            <input type="checkbox" id="color-toggle-checkbox">
-            <span class="checkmark"></span>
-        </label>
-    </div> 
-    
+        <button class="prompt-action-btn" id="btn-color-yes">
+            <img src="yes.png" alt="Yes" class="prompt-icon">
+        </button>
+       
+    </div>
 </div>
         
+            
             <!-- Контейнер для фото з бекенду -->
             <div class="image-display-area">
                 <img src="placeholder.jpg" alt="Space Frame" class="backend-frame-img" id="current-frame-img">
