@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubStellar SPHEREx</title>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Основна логіка почалась -->
+    <div class="app-container">
+    
+       <!-- САЙДБАР (Спочатку на весь екран, потім з'їжджає вліво) -->
+        <div class="sidebar expanded" id="sidebar">
+            <h1 class="logo">SubStellar | SPHEREx</h1>
+            
+            
+            <button class="forward-action-btn hidden" id="btn-go-forward">
+                <img src="back right.png" alt="Forward">
+            </button>
+            
+            <!-- Рамка з даними -->
+            <div class="sidebar-info-frame" id="info-frame">
+                <div class="frame-title">Choose optimal speed</div>
+                <div class="speed-options">
+                    
+                        <button class="speed-btn active" data-speed="30">
+                            FAST<br><span>(30 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="60">
+                            Normal<br><span>(60 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="100">
+                            HARD<br><span>(100 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="180">
+                            SLOW<br><span>(180 frames)</span>
+                        </button>
+                </div>
+                  <!-- Об'єднаний рядок для назви АБО координат -->
+                <div class="frame-data-row">
+                    <span class="frame-label">NAME/COORDINATES</span>
+                    <span class="frame-value" id="val-target" contenteditable="true" spellcheck="false">M101/RA, DEC = 210,8, 54,35</span>
+                </div>
+
+                <div class="frame-data-row">
+                        <span class="frame-label">Detector Band</span>
+                        <span class="frame-value" id="val-band" contenteditable="true" spellcheck="false">'D2' 'D3,D4' 'all'</span>
+                </div>
+            </div>
+
+
+
+            <div class="detection-container">
+                <div class="space-loader" id="space-loader">
+                    <div class="orbit-tail"></div>
+                    <div class="orbiting-star"></div>
+                </div>
+                <button class="detect-btn" id="detect-btn">Search</button>
+            </div>
+            <button class="back-action-btn" id="btn-go-back">
+                <img src="back.png" alt="Back">
+            </button>
+        </div>
+
+        <!-- ГОЛОВНА РОБОЧА ЗОНА -->
+        <div class="main-viewport hidden" id="main-viewport">
+ <div class="description-info-frame">
+    <div class="frame-title">MISSION OVERVIEW</div>
+    <div class="desc-text">
+        <p style="margin-top: 0;">SPHEREx creates a complete near-infrared map of the sky every six months. It captures 102 colors, earning it the nickname "the mantis shrimp of telescopes.</p>
+        
+        <p style="margin-bottom: 0;">Over its two-year mission, it will survey over 450 million galaxies, determining their distances by color. All data becomes public within 60 days, allowing you to work with it on an equal footing with scientists.</p>
+    </div>
+</div>
+            
+           <div class="viewport-info-frame">
+            <div class="frame-data-row">
+                <span class="frame-label">DATA</span>
+                <span class="frame-value" id="val-viewport-data" contenteditable="true" spellcheck="false">March 2025</span>
+            </div>
+
+            <div class="frame-data-row">
+                <span class="frame-label">WAVES LENGTHS λ=</span>
+                <span class="frame-value" id="val-viewport-waves" contenteditable="true" spellcheck="false">0.75 - 5.0 μm</span>
+            </div>
+        </div>
+            
+
+            <div class="color-prompt-frame">
+    <div class="color-prompt-text">Show in colour?</div>
+    
+     <div class="color-prompt-icons">
+        <!-- Нова структура для чекбокса -->
+        <label class="custom-checkbox">
+            <input type="checkbox" id="color-toggle-checkbox">
+            <span class="checkmark"></span>
+        </label>
+    </div>
+</div>
+        
+            
+            <!-- Контейнер для фото з бекенду -->
+            <div class="image-display-area">
+                <img src="placeholder.jpg" alt="Space Frame" class="backend-frame-img" id="current-frame-img">
+            
+                <div class="sci-fi-crosshair" id="crosshair">
+                    <span class="line-top"></span><span class="line-bottom"></span>
+                    <span class="line-left"></span><span class="line-right"></span>
+                </div>
+            </div>
+
+            <!-- Таймлайн під фотографією -->
+            <div class="orbital-timeline-bar">
+                <div class="orbit-track-container">
+                    <!-- SVG з пунктирною дугою -->
+                    <svg class="orbital-svg" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                        <path id="orbit-path" d="M 20,90 Q 500,0 980,90" fill="transparent" stroke="#FFB300" stroke-width="3" stroke-dasharray="12, 10" />
+                    </svg>
+
+                    <!-- Сонечко та повзунок -->
+                    <div class="sun-orbit-thumb" id="sun-thumb"></div>
+                    <input type="range" min="1" max="100" step="any" value="1" class="orbit-range-input" id="orbit-slider">
+                </div>
+
+                <div class="playback-controls">
+                    <button class="control-btn" id="btn-rewind">
+                        <img src="left_arrow.png" alt="Назад">
+                    </button>
+                    <button class="control-btn" id="btn-play-pause">
+                        <img src="play.png" alt="Плей/Пауза" id="play-pause-img">
+                    </button>
+                    <button class="control-btn" id="btn-forward">
+                        <img src="right_arrow.png" alt="Вперед">
+                    </button>
+                </div>
+                
+                <div class="timeline-labels">
+                    <span class="frame-indicator" id="frame-counter">Кадр: 1 / 100</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Основна логіка закінчилась -->
+
+    <script src="script.js" defer></script>
+</body>
+</html>

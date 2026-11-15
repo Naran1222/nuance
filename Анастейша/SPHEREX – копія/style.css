@@ -1,0 +1,753 @@
+body {
+    margin: 0;
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+
+     cursor: url('cursor.png') 0 0, auto;
+}
+
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.75); 
+    
+    /* Додано linear-gradient для затемнення */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('9d5bbf5f-1fa7-4942-8496-beeaa3488991.png'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+}
+
+/* Базовий стиль сайдбару */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    height: 100vh;
+    box-sizing: border-box; /* Щоб відступи не ламали ширину */
+    position: relative;
+}
+
+/* СТАН 1: Стартовий екран (на всю ширину екрана) */
+.sidebar.expanded {
+    width: 100vw; /* Займає рівно 100% ширини вікна */
+    border-right: none; /* Прибираємо праву лінію на головному екрані */
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed .sidebar-info-frame {
+    /* Наприклад, опускаємо її трохи нижче: */
+    margin-top: 60px; 
+    
+    /* Або, якщо хочете посунути її лівіше/правіше (оскільки вона має width: 85% і margin: 0 auto): */
+    /* transform: translateX(-10px); */ 
+} 
+
+/* СТАН 2: Робочий режим (звужений сайдбар) */
+.sidebar.collapsed {
+    width: 350px;
+    min-width: 350px; /* Забороняємо йому стискатися менше цієї ширини */
+    justify-content: flex-start;
+    padding-top: 40px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Лінія з'являється тільки тут */
+}
+
+/* Новий в'юпорт (робоча зона) */
+.main-viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease 0.5s;
+    position: relative; /* ЦЕ НАЙГОЛОВНІШИЙ РЯДОК ДЛЯ РАМКИ */
+}
+
+/* Стан: прихований */
+.main-viewport.hidden {
+    opacity: 0;
+    pointer-events: none;
+    flex: 0;
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    transition: opacity 0.1s ease;
+}
+  
+
+.logo {
+    font-size: 30px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 20px;
+}
+
+.logo .sub-word {
+    display: block;
+}
+.desc {
+    font-size: 14px;
+    color: #A0A5B5;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Контейнер для фотографії */
+.image-display-area {
+    position: relative; /* Дуже важливо, щоб приціл не вилітав за межі */
+    width: 352px;
+    height: 352px;
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    margin-bottom: 40px; /* Відступ вниз до таймлайну */
+    background: #000;
+    right: 20px;
+}
+
+.backend-frame-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Оновлюємо ваш приціл */
+.sci-fi-crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Точно по центру фотографії */
+    /* ... інші ваші старі стилі прицілу (лінії, кольори) залишаються без змін ... */
+}
+/*потужна таймлайн*/
+
+.orbital-timeline-bar {
+    position: relative; /* ЗМІНЕНО З absolute */
+    bottom: auto;       /* Прибираємо прив'язку до низу */
+    left: auto;         /* Прибираємо прив'язку до лівого краю */
+    transform: none;    /* Прибираємо translateX */
+    
+    width: 100%;
+    max-width: 600px;   /* Можете налаштувати ширину під себе */
+    
+    
+    
+}
+
+/* Обгортка для орбіти, відносно якої все позиціонується */
+.orbit-track-container {
+    position: relative;
+    width: 100%;
+    height: 70px;
+}
+
+/* SVG розтягується на всю ширину і висоту контейнера */
+.orbital-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+/* Твоє сонечко */
+.sun-orbit-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* transform посуває центр картинки точно в розраховані координати */
+    transform: translate(-50%, -50%); 
+    width: 36px;
+    height: 36px;
+    background-image: url('sun_original_60x60.png');
+    background-color: #FFB300; /* Тимчасова заглушка, якщо картинка не завантажиться */
+    border-radius: 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none; /* Щоб кліки проходили крізь сонечко на повзунок */
+    z-index: 5;
+    filter: drop-shadow(0 0 8px rgba(255, 179, 0, 0.8));
+    /* Прибрано transition, щоб рух мишею був миттєвим та плавним */
+}
+
+/* Невидимий повзунок поверх усього */
+.orbit-range-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Робимо невидимим */
+    cursor: pointer;
+    z-index: 10;
+
+    /* ЗМІНЕНО: Примусово зберігаємо наш космічний курсор при наведенні на повзунок */
+    cursor: url('cursor.png') 0 0, pointer !important;
+}
+
+/* Підписи */
+.timeline-labels {
+   width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    margin-top: -135px; /* <--- Измените это значение. Чем меньше цифра, тем выше поднимется текст */
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #FFB300;
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+.frame-indicator {
+    color: #00E5FF;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+}
+
+.detection-container {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+}
+
+.detect-btn {
+  background-color: #fbd300; 
+  color: #1c1c20; 
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+/* Контейнер лоадера */
+.space-loader {
+  position: absolute;
+  bottom: 60px;
+  width: 70px; 
+  height: 70px;
+  display: none; 
+  justify-content: center;
+  align-items: center;
+}
+
+.space-loader.active {
+  display: flex;
+}
+
+/* НОВЕ: Лінія орбіти з ефектом розчинення */
+.orbit-tail {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Сама лінія тепер трохи яскравіша */
+  border: 2px solid rgba(64, 224, 208, 0.9);
+  
+  /* МАГІЯ: Ця маска робить половину кола прозорою, а іншу половину плавно виводить у суцільну лінію */
+  -webkit-mask: conic-gradient(from 90deg, transparent 50%, black 100%);
+  mask: conic-gradient(from 90deg, transparent 50%, black 100%);
+  
+  /* Крутимо цей градієнт-маску з тією ж швидкістю, що й зірку */
+  animation: spin-tail 2s linear infinite;
+}
+
+/* Зірка (без змін) */
+.orbiting-star {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 12px 4px rgba(255, 255, 255, 0.9),
+    0 0 25px 10px rgba(64, 224, 208, 0.6);
+  animation: orbit-spin 2s linear infinite;
+}
+
+/* Горизонтальний промінь (блік) */
+.orbiting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90px;
+  height: 2px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%);
+  transform: translate(-50%, -50%);
+}
+
+/* Анімація маски-хвоста (просто крутиться навколо центру) */
+@keyframes spin-tail {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Анімація зірки (рухається по краю, тримаючи промінь горизонтально) */
+@keyframes orbit-spin {
+  0% { transform: rotate(0deg) translateX(35px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(35px) rotate(-360deg); }
+}
+
+/*рамка доробити*/
+
+/* Основна рамка сайдбару */
+/* Основна рамка сайдбару */
+.sidebar-info-frame {
+    width: 85%; 
+    max-width: 500px; 
+    margin: 0 auto; 
+    box-sizing: border-box; 
+    background: transparent; 
+    border-radius: 0; 
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    font-family: 'Arial', sans-serif;
+    
+}
+/* Контейнер для кожного окремого поля */
+.frame-data-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed rgba(0, 229, 255, 0.2); /* Тонка пунктирна лінія-розділювач */
+}
+
+/* Останньому елементу прибираємо відступ і лінію знизу */
+.frame-data-row:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* Назви полів (Name, Coordinates, Detector Band) */
+.frame-label {
+  font-size: 11px;
+  color: rgba(0, 229, 255, 0.8); /* Ніжно-блакитний колір тексту */
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+/* Значення полів */
+.frame-value[contenteditable="true"] {
+    outline: none;
+    cursor: text;
+    display: inline-block; /* Щоб можна було клікнути навіть якщо порожньо */
+    min-width: 100px; /* Мінімальна ширина для порожнього поля */
+    transition: text-shadow 0.2s ease;
+}
+
+.frame-value[contenteditable="true"]:focus {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.9); /* Неонове світіння при наборі тексту */
+}
+.frame-value[contenteditable="true"] {
+    outline: none;
+}
+
+/* ========================================= */
+/* Стили для кнопок управления плеером       */
+/* ========================================= */
+.playback-controls {
+    display: flex;
+    justify-content: center; /* Центрируем кнопки по горизонтали */
+    align-items: center;     /* Выравниваем по вертикали */
+    gap: 40px;               /* Расстояние между кнопками */
+    margin-top: 15px;        /* Отступ от дуги сверху */
+    margin-bottom: 5px;
+    z-index: 20;             /* Чтобы кнопки были поверх других слоев */
+    position: relative;
+     right: 20px;
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    /* Применяем твой курсор на кнопки */
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Эффект увеличения и свечения при наведении */
+.control-btn:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)); /* Голубое свечение */
+}
+
+/* Эффект "нажатия" */
+.control-btn:active {
+    transform: scale(0.95);
+}
+
+/* Настройки размера самих иконок */
+.control-btn img {
+    height: 35px; /* Задай нужный размер иконок */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Кнопка BACK у робочій зоні */
+.back-action-btn {
+    position: absolute;
+    bottom: 30px; /* БУЛО: bottom: 30px; */
+    left: 30px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    z-index: 100;
+}
+/* Ховаємо кнопку BACK, коли сайдбар на весь екран (на стартовій сторінці) */
+.sidebar.expanded .back-action-btn {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Показуємо кнопку BACK, коли сайдбар згорнутий (у робочій зоні) */
+.sidebar.collapsed .back-action-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+.back-action-btn img {
+    height: 40px; /* Розмір кнопки (можна змінити) */
+    width: auto;
+    object-fit: contain;
+}
+
+/* Ефекти наведення (обов'язково залишаємо translateX, щоб вона не з'їжджала вбік) */
+.back-action-btn:hover {
+    transform:  scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+}
+
+.back-action-btn:active {
+    transform:  scale(0.95);
+}
+
+/* Кнопка "Вперед" на главной странице */
+/* Кнопка "Вперед" на головній сторінці (закріплена внизу праворуч) */
+.forward-action-btn {
+    position: absolute;
+    bottom: 40px;          /* Відступ від нижнього краю */
+    right: 40px;           /* Відступ від правого краю */
+    
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    opacity: 1;
+    pointer-events: auto;
+    
+}
+
+/* Стан, коли кнопка схована */
+.forward-action-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Ефекти наведення (translateX тут більше не потрібен) */
+.forward-action-btn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
+}
+
+.forward-action-btn:active {
+    transform: scale(0.95);
+}
+
+.forward-action-btn img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* ========================================= */
+/* 1. САМА РАМКА З ПИТАННЯМ (контейнер)      */
+/* ========================================= */
+.color-prompt-frame {
+    position: absolute;
+    left: 10%; /* Відступаємо 10% від правого краю екрана, щоб не прилипала */
+    top: 55%; /* Центруємо по вертикалі */
+    transform: translateY(-50%); /* Точне вирівнювання */
+    
+    width: 250px; /* Компактна ширина */
+    background: rgba(0, 0, 0, 0.5); /* Напівпрозорий темний фон, щоб не зливалося із зірками */
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column; /* Текст буде НАД кнопками */
+    align-items: center;
+    gap: 20px;
+    box-sizing: border-box;
+    z-index: 50;
+}
+.color-prompt-icons {
+    display: flex;
+    flex-direction: row; /* Вибудовуємо кнопки горизонтально */
+    justify-content: center;
+    align-items: center;
+    gap: 30px; /* Відстань між галочкою і хрестиком */
+    width: 100%;
+}
+
+/* ========================================= */
+/* 2. ІНТЕРАКТИВНІ КНОПКИ (Так / Ні)         */
+/* ========================================= */
+/* Контейнер-лейбл */
+.custom-checkbox {
+    display: inline-block;
+    position: relative;
+    padding-left: 35px; /* Місце для квадрата */
+    margin-bottom: 25px;
+    cursor: url('cursor.png') 0 0, pointer !important; /* Твій курсор */
+    font-size: 22px;
+    user-select: none;
+}
+
+/* Ховаємо стандартний системний чекбокс */
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Створюємо наш порожній квадрат */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Центруємо квадрат */
+    left: 50%;
+    transform: translateX(-50%);
+    height: 30px;
+    width: 30px;
+    background-color: transparent;
+    border: 2px solid rgba(0, 229, 255, 0.5); /* Блакитна рамка */
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    border-radius: 4px; /* Легке закруглення кутів */
+    transition: all 0.3s ease;
+}
+
+
+/* Створюємо саму галочку (вона прихована за замовчуванням) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Показуємо галочку, коли чекбокс активний */
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Відображаємо твою стару картинку (yes.png) замість CSS-галочки */
+.custom-checkbox .checkmark:after {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('yes.png');
+    background-size: 130%; /* Можеш змінювати відсоток (наприклад 100% або 150%), щоб зробити галочку більшою чи меншою */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Прибираємо старі налаштування CSS-ліній */
+    border: none;
+    transform: none;
+    
+    /* Додаємо легке світіння для самої картинки */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); 
+}
+
+/* ========================================= */
+/* 4. КНОПКА ВИЯВИТИ АНОМАЛІЇ                */
+/* ========================================= */
+.detect-btn {
+    background: rgba(0, 229, 255, 0.04); 
+    color: #00E5FF; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 2.5px;
+    border: 1px solid rgba(0, 229, 255, 0.4); 
+    border-radius: 6px; 
+    padding: 16px 54px; 
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    text-transform: uppercase;
+}
+
+.detect-btn:hover {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.25), inset 0 0 12px rgba(0, 229, 255, 0.1);
+    color: #FFFFFF; 
+}
+
+.detect-btn:active {
+    background: rgba(0, 229, 255, 0.18);
+    transform: scale(0.98); 
+}
+
+/* ========================================= */
+/* БЛОК ВИБОРУ ШВИДКОСТІ                     */
+/* ========================================= */
+.speed-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px; /* Відстань між кнопками */
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.speed-btn {
+    flex: 1; /* Кнопки займають рівне місце */
+    background: rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    color: rgba(0, 229, 255, 0.7);
+    border-radius: 4px;
+    padding: 10px 5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 1px;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Дрібний текст (кадри) під основною назвою */
+.speed-btn span {
+    font-size: 10px;
+    color: #A0A5B5;
+    font-weight: 400;
+    font-family: monospace;
+}
+
+/* Наведення мишкою */
+.speed-btn:hover {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: rgba(0, 229, 255, 0.6);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.speed-btn:hover span {
+    color: rgba(0, 229, 255, 0.8);
+}
+
+/* Активна (обрана) кнопка */
+.speed-btn.active {
+    background: rgba(0, 229, 255, 0.25);
+    border-color: #00E5FF;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.speed-btn.active span {
+    color: #00E5FF;
+}
+
+/* ========================================= */
+/* ЗАГОЛОВОК ДЛЯ БЛОКІВ У САЙДБАРІ           */
+/* ========================================= */
+.frame-title {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.3); /* Лінія під заголовком */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Легке світіння тексту */
+    width: 100%;
+} 
+
+.viewport-info-frame {
+    position: absolute; /* Відриває текст від центру */
+    left: 10%;          /* Притискає до лівого краю екрана */
+    top: 35%;           /* Опускає на середину по вертикалі */
+    transform: translateY(-50%); /* Точне центрування */
+    
+    width: 250px; 
+    background: rgba(0, 0, 0, 0.75); /* Додає темний фон */
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3); /* Блакитна рамочка */
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column;
+    gap: 0px; 
+    box-sizing: border-box;
+    z-index: 50;
+}
+
+.description-info-frame {
+    position: absolute;
+    right: 5%; /* Трохи зменшив відступ, бо рамка стала ширшою */
+    top: 45%;  /* Ставимо по центру */
+    transform: translateY(-50%);
+    
+    width: 300px; /* Збільшена ширина, щоб текст ліг красивими пропорціями */
+    height: auto; /* Висота автоматично підлаштується під об'єм тексту */
+    
+    background: rgba(0, 0, 0, 0.75); 
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+    box-sizing: border-box;
+    z-index: 50;
+}
+
+.description-info-frame .frame-title {
+    margin-bottom: 2px;
+    font-size: 12px; /* Заголовок трохи більший, щоб виділявся */
+    color: #FFFFFF;
+}
+
+.desc-text {
+    color: #A0A5B5; 
+    font-size: 13px; /* Оптимальний розмір для читання */
+    line-height: 1.6; /* Збільшив міжрядковий інтервал для кращого сприйняття тексту */
+    text-align: justify; /* Вирівнювання по ширині виглядає дуже акуратно в таких UI */
+}
