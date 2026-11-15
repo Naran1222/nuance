@@ -20,7 +20,7 @@ import math
 import warnings
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from astropy.convolution import Gaussian2DKernel, interpolate_replace_nans
@@ -292,6 +292,7 @@ def build_color(
     verbose: bool = True,
     max_epoch_days: Optional[float] = None,
     overview: bool = True,
+    out_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
     if fmt not in FORMATS:
         raise ValueError(f"Невідомий формат '{fmt}'. Допустимі: {', '.join(FORMATS)}.")
@@ -328,12 +329,15 @@ def build_color(
             if tok and tok != "ALL":
                 raw_band_tokens.append(tok)
     band_names = sorted(set(raw_band_tokens)) if raw_band_tokens else ["ALL"]
-    digest = hashlib.md5(("|".join(sorted(data["sources"])) + f"|{epoch_gap_days}|{max_epoch_days}|{method}").encode()).hexdigest()[:6]
-    name = (f"ra{meta['target']['ra_deg']:.5f}_dec{meta['target']['dec_deg']:+.5f}"
-            f"_s{meta['query']['size_deg']:g}_{'-'.join(band_names)}_color_{digest}")
-    if tag:
-        name += f"_{tag}"
-    out_dir = Path(out_root) / name
+    if out_dir is not None:
+        out_dir = Path(out_dir)
+    else:
+        digest = hashlib.md5(("|".join(sorted(data["sources"])) + f"|{epoch_gap_days}|{max_epoch_days}|{method}").encode()).hexdigest()[:6]
+        name = (f"ra{meta['target']['ra_deg']:.5f}_dec{meta['target']['dec_deg']:+.5f}"
+                f"_s{meta['query']['size_deg']:g}_{'-'.join(band_names)}_color_{digest}")
+        if tag:
+            name += f"_{tag}"
+        out_dir = Path(out_root) / name
     out_dir.mkdir(parents=True, exist_ok=True)
     for old in list(out_dir.glob("*_rgb.*")) + [out_dir / n for n in
                                                  ("overview.png", "compose.json", "compose_stack.npz")]:

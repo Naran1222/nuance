@@ -44,6 +44,14 @@ def validate_limit(limit: int, strict_web_presets: bool = False) -> int:
         raise ValueError("Ліміт кадрів не може бути від'ємним.")
     return val
 
+def _resolve_custom_out_dir(out_dir: Optional[Union[str, Path]]) -> Optional[Path]:
+    if out_dir is None or str(out_dir).strip() == "":
+        return None
+    raw = str(out_dir).strip()
+    p = Path(raw)
+    if p.is_absolute() or len(p.parts) > 1 or raw.startswith((".", "/", "\\")):
+        return p
+    return OUT_DIR / p
 
 def run(
     target="M101",
@@ -65,8 +73,10 @@ def run(
     color: bool = False,
     max_epoch_days: Optional[float] = None,
     strict_web_presets: bool = False,
+    out_dir: Optional[Union[str, Path]] = None,
 ):
     """Повертає (таблиця знімків, список кадрів, папка з результатом кроку 3 або None)."""
+    custom_out_dir = _resolve_custom_out_dir(out_dir)
     limit = validate_limit(limit, strict_web_presets=strict_web_presets)
     coord = resolve_target(target)
     raw_bands = bands if bands is not None else band
@@ -93,7 +103,9 @@ def run(
     OUT_DIR.mkdir(exist_ok=True)
 
     if not render or not frames:
-        summary.write(OUT_DIR / "frames_summary.csv", format="ascii.csv", overwrite=True)
+        target_out = custom_out_dir if custom_out_dir is not None else OUT_DIR
+        target_out.mkdir(parents=True, exist_ok=True)
+        summary.write(target_out / "frames_summary.csv", format="ascii.csv", overwrite=True)
         return table, frames, None
 
     print("\nКрок 3. Вирівнювання за WCS та PNG")
@@ -120,6 +132,7 @@ def run(
         quality=quality,
         tag=tag,
         min_coverage=min_coverage,
+        out_dir=custom_out_dir,
     )
     summary.write(out_dir / "frames_summary.csv", format="ascii.csv", overwrite=True)
 
@@ -127,13 +140,16 @@ def run(
         print("\nКрок 3б. Кольоровий композит за обраними смугами")
         from pipeline.compose import build_color
         try:
-            color_dir = build_color([out_dir], fmt=fmt, quality=quality, max_epoch_days=max_epoch_days)
+            color_dir = build_color(
+                [out_dir],
+                fmt=fmt,
+                quality=quality,
+                max_epoch_days=max_epoch_days,
+                out_dir=custom_out_dir,
+            )
             print(f"  Кольоровий результат: {color_dir}")
         except Exception as exc:
             print(f"  [compose] не вдалося побудувати кольоровий композит: {exc}")
-
-    print(f"\nГотово. Результат: {out_dir}")
-    print(f"Для швидкої візуальної перевірки відкрий: {out_dir / 'contact_sheet.png'}")
     return table, frames, out_dir
 
 
@@ -169,6 +185,8 @@ def main():
                         help="відкидати кадри, де покриття поля нижче цієї частки (кадри біля краю детектора)")
     parser.add_argument("--no-zodi", action="store_true", help="не віднімати зодіакальне світло")
     parser.add_argument("--mask-outliers", action="store_true", help="маскувати піксели-викиди (біт OUTLIER)")
+    parser.add_argument("--out-dir", default=None,
+                        help="назва або шлях вихідної папки (за замовчуванням генерується автоматично в out/)")
     args = parser.parse_args()
 
     run(
@@ -190,6 +208,7 @@ def main():
         bands=args.bands,
         color=args.color,
         strict_web_presets=args.strict_web_limit,
+        out_dir=args.out_dir,
     )
 
 

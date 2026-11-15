@@ -10,7 +10,7 @@ import json
 import math
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 from astropy.coordinates import SkyCoord
@@ -306,6 +306,7 @@ def render_all(
     min_coverage: float = 0.98,
     contact_sheet: bool = True,
     bands: Optional[Sequence[str]] = None,
+    out_dir: Optional[Union[str, Path]] = None,
 ) -> Path:
     if not frames:
         raise ValueError("Немає кадрів для рендеру (список порожній).")
@@ -313,7 +314,7 @@ def render_all(
         raise ValueError(f"Невідомий формат '{fmt}'. Допустимі: {', '.join(IMAGE_FORMATS)}.")
 
     fov = float(fov_deg) if fov_deg else default_fov(size_deg)
-    out_dir = output_dir_for(coord, size_deg, band, out_root, tag, bands=bands)
+    out_dir = Path(out_dir) if out_dir is not None else output_dir_for(coord, size_deg, band, out_root, tag, bands=bands)
     out_dir.mkdir(parents=True, exist_ok=True)
     for old in list(out_dir.glob("frame_*.*")) + [out_dir / n for n in
                                                    ("manifest.json", "stack.npz", "contact_sheet.png")]:
