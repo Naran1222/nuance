@@ -171,10 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const btnGoBack = document.getElementById('btn-go-back');
+const btnGoForward = document.getElementById('btn-go-forward');
 const sidebar = document.querySelector('.sidebar');
 const mainViewport = document.querySelector('.main-viewport');
 
-// Логіка повернення на початковий екран
+// Логіка натискання на "НАЗАД" (повертаємось на головну)
 btnGoBack.addEventListener('click', () => {
     // Ховаємо робочу зону з сонцем
     mainViewport.classList.add('hidden');
@@ -182,10 +183,24 @@ btnGoBack.addEventListener('click', () => {
     // Розгортаємо сайдбар назад на весь екран
     sidebar.classList.remove('collapsed');
     sidebar.classList.add('expanded');
+    
+    // Показуємо кнопку "Вперед"
+    btnGoForward.classList.remove('hidden');
 });
 
+// Логіка натискання на кнопку "ВПЕРЕД" (повертаємось до сонця)
+btnGoForward.addEventListener('click', () => {
+    // Згортаємо сайдбар
+    sidebar.classList.remove('expanded');
+    sidebar.classList.add('collapsed');
+    
+    // Показуємо робочу зону з сонцем
+    mainViewport.classList.remove('hidden');
+    
+    // ХОВАЄМО КНОПКУ "ВПЕРЕД", щоб вона не висіла на екрані з космосом!
+    btnGoForward.classList.add('hidden');
+});
 
-const btnGoForward = document.getElementById('btn-go-forward'); // НОВАЯ КНОПКА (стрелка вправо)
 
 // Логика нажатия на "НАЗАД" (находимся у солнца, возвращаемся на главную)
 btnGoBack.addEventListener('click', () => {
@@ -208,4 +223,53 @@ btnGoForward.addEventListener('click', () => {
     
     // Показуємо робочу зону з сонцем
     mainViewport.classList.remove('hidden');
+});
+
+// Знаходимо кнопки Так і Ні
+const btnColorYes = document.getElementById('btn-color-yes');
+const btnColorNo = document.getElementById('btn-color-no');
+const currentFrameImg = document.getElementById('current-frame-img'); // Твоя фотографія космосу
+
+// Логіка для кнопки ТАК (Галочка)
+btnColorYes.addEventListener('click', () => {
+    console.log("Запит на бекенд: завантажити КОЛЬОРОВУ картинку...");
+    
+    // В МАЙБУТНЬОМУ ТУТ БУДЕ КОД БЕКЕНДУ:
+    // fetch('/api/get-color-image') ...
+    // currentFrameImg.src = 'шлях_до_кольорової_картинки_від_бекенду.jpg';
+    
+    // Візуальний відгук (робимо кнопку активнішою)
+    btnColorYes.style.filter = 'drop-shadow(0 0 15px rgba(0, 255, 0, 0.8))'; // Зелене світіння
+    setTimeout(() => btnColorYes.style.filter = '', 300); // Повертаємо назад
+});
+
+// Логіка для кнопки НІ (Хрестик)
+btnColorNo.addEventListener('click', () => {
+    console.log("Запит на бекенд: завантажити ЧОРНО-БІЛУ картинку...");
+    
+    // В МАЙБУТНЬОМУ ТУТ БУДЕ КОД БЕКЕНДУ:
+    // currentFrameImg.src = 'шлях_до_звичайної_картинки.jpg';
+    
+    // Візуальний відгук
+    btnColorNo.style.filter = 'drop-shadow(0 0 15px rgba(255, 0, 0, 0.8))'; // Червоне світіння
+    setTimeout(() => btnColorNo.style.filter = '', 300);
+});
+
+// ==========================================
+// ЛОГІКА ВИБОРУ ШВИДКОСТІ
+// ==========================================
+const speedBtns = document.querySelectorAll('.speed-btn');
+
+speedBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // 1. Знімаємо підсвітку (клас active) з усіх кнопок
+        speedBtns.forEach(b => b.classList.remove('active'));
+        
+        // 2. Додаємо підсвітку тільки на ту, яку зараз натиснули
+        btn.classList.add('active');
+        
+        // 3. Отримуємо значення кадрів (для майбутнього бекенду)
+        const selectedSpeed = btn.getAttribute('data-speed');
+        console.log(`Обрана швидкість: ${selectedSpeed} fps`);
+    });
 });

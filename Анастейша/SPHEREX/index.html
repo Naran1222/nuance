@@ -22,7 +22,22 @@
             
             <!-- Рамка з даними -->
             <div class="sidebar-info-frame" id="info-frame">
-
+                <div class="frame-title">Choose optimal speed</div>
+                <div class="speed-options">
+                    
+                        <button class="speed-btn active" data-speed="30">
+                            FAST<br><span>(30 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="60">
+                            BALANCED<br><span>(60 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="100">
+                            HARD<br><span>(100 frames)</span>
+                        </button>
+                        <button class="speed-btn" data-speed="180">
+                            SLOW<br><span>(180 frames)</span>
+                        </button>
+                </div>
                   <!-- Об'єднаний рядок для назви АБО координат -->
                 <div class="frame-data-row">
                     <span class="frame-label">NAME OR COORDINATES</span>
@@ -31,34 +46,38 @@
 
                 <div class="frame-data-row">
                         <span class="frame-label">Detector Band</span>
-                        <span class="frame-value" id="val-band" contenteditable="true" spellcheck="false">Planet Earth</span>
+                        <span class="frame-value" id="val-band" contenteditable="true" spellcheck="false">'D2' 'D3,D4' 'all'</span>
                 </div>
             </div>
 
-<div class="color-prompt-frame">
-                <div class="color-prompt-text">Show in colour?</div>
-                <div class="color-prompt-icons">
-                    <img src="yes.png" alt="Yes" class="prompt-icon">
-                    <img src="no.png" alt="No" class="prompt-icon">
-                </div>
-            </div>
+
 
             <div class="detection-container">
                 <div class="space-loader" id="space-loader">
                     <div class="orbit-tail"></div>
                     <div class="orbiting-star"></div>
                 </div>
-                <button class="detect-btn" id="detect-btn">ВИЯВИТИ АНОМАЛІЇ</button>
+                <button class="detect-btn" id="detect-btn">Search</button>
             </div>
+            <button class="back-action-btn" id="btn-go-back">
+                <img src="back.png" alt="Back">
+            </button>
         </div>
 
         <!-- ГОЛОВНА РОБОЧА ЗОНА -->
         <div class="main-viewport hidden" id="main-viewport">
-            
+            <div class="color-prompt-frame">
+    <div class="color-prompt-text">Show in colour?</div>
+    
+    <div class="color-prompt-icons">
+        <button class="prompt-action-btn" id="btn-color-yes">
+            <img src="yes.png" alt="Yes" class="prompt-icon">
+        </button>
+       
+    </div>
+</div>
         
-            <button class="back-action-btn" id="btn-go-back">
-                <img src="back.png" alt="Back">
-            </button>
+            
             <!-- Контейнер для фото з бекенду -->
             <div class="image-display-area">
                 <img src="placeholder.jpg" alt="Space Frame" class="backend-frame-img" id="current-frame-img">

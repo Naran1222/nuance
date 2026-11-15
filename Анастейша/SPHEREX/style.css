@@ -54,12 +54,13 @@ body {
 
 /* Новий в'юпорт (робоча зона) */
 .main-viewport {
-    flex: 1; /* Займає весь вільний простір справа від сайдбару */
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: opacity 1s ease 0.5s; /* Плавна поява з затримкою */
+    transition: opacity 1s ease 0.5s;
+    position: relative; /* ЦЕ НАЙГОЛОВНІШИЙ РЯДОК ДЛЯ РАМКИ */
 }
 
 /* Стан: прихований */
@@ -70,6 +71,7 @@ body {
     width: 0;
     padding: 0;
     overflow: hidden;
+    transition: opacity 0.1s ease;
 }
   
 
@@ -292,30 +294,19 @@ body {
 /*рамка доробити*/
 
 /* Основна рамка сайдбару */
+/* Основна рамка сайдбару */
 .sidebar-info-frame {
-  /* Зменшуємо ширину та центруємо по горизонталі сайдбару */
-  width: 85%; 
-  margin: 0 auto; 
-  box-sizing: border-box; /* Гарантує, що padding не розширюватиме блок */
-  
-  /* Прозорий фон (для чорного змініть на background: #000000;) */
-  background: transparent; 
-  
-  
-  
-  /* Загострені кути */
-  border-radius: 0; 
-  
-  padding: 20px;
-  
-  /* Легке блакитне світіння зовні та всередині */
-  box-shadow: 
-    0 0 15px rgba(0, 229, 255, 0.1), 
-    inset 0 0 10px rgba(0, 229, 255, 0.05);
-  
-  font-family: 'Arial', sans-serif;
+    width: 85%; 
+    max-width: 500px; 
+    margin: 0 auto; 
+    box-sizing: border-box; 
+    background: transparent; 
+    border-radius: 0; 
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    font-family: 'Arial', sans-serif;
+    
 }
-
 /* Контейнер для кожного окремого поля */
 .frame-data-row {
   display: flex;
@@ -405,7 +396,7 @@ body {
 /* Кнопка BACK у робочій зоні */
 .back-action-btn {
     position: absolute;
-    bottom: 30px;
+    bottom: 30px; /* БУЛО: bottom: 30px; */
     left: 30px;
     background: transparent;
     border: none;
@@ -414,20 +405,31 @@ body {
     transition: transform 0.2s ease, filter 0.2s ease;
     z-index: 100;
 }
+/* Ховаємо кнопку BACK, коли сайдбар на весь екран (на стартовій сторінці) */
+.sidebar.expanded .back-action-btn {
+    opacity: 0;
+    pointer-events: none;
+}
 
+/* Показуємо кнопку BACK, коли сайдбар згорнутий (у робочій зоні) */
+.sidebar.collapsed .back-action-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
 .back-action-btn img {
     height: 40px; /* Розмір кнопки (можна змінити) */
     width: auto;
     object-fit: contain;
 }
 
+/* Ефекти наведення (обов'язково залишаємо translateX, щоб вона не з'їжджала вбік) */
 .back-action-btn:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)); /* Блакитне світіння як у інших кнопок */
+    transform: translateX(-50%) scale(1.1);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
 }
 
 .back-action-btn:active {
-    transform: scale(0.95);
+    transform: translateX(-50%) scale(0.95);
 }
 
 /* Кнопка "Вперед" на главной странице */
@@ -468,30 +470,181 @@ body {
     width: auto;
     object-fit: contain;
 }
+
+/* ========================================= */
+/* 1. САМА РАМКА З ПИТАННЯМ (контейнер)      */
+/* ========================================= */
 .color-prompt-frame {
-    width: 85%;
-    margin: 30px auto 0;
-    background: transparent;
+    position: absolute;
+    right: 15%; /* Відступаємо 10% від правого краю екрана, щоб не прилипала */
+    top: 25%; /* Центруємо по вертикалі */
+    transform: translateY(-50%); /* Точне вирівнювання */
+    
+    width: 220px; /* Компактна ширина */
+    background: rgba(0, 0, 0, 0.5); /* Напівпрозорий темний фон, щоб не зливалося із зірками */
     padding: 20px;
     border: 1px solid rgba(0, 229, 255, 0.3);
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column; /* Текст буде НАД кнопками */
+    align-items: center;
+    gap: 20px;
+    box-sizing: border-box;
+    z-index: 50;
+}
+.color-prompt-icons {
+    display: flex;
+    flex-direction: row; /* Вибудовуємо кнопки горизонтально */
+    justify-content: center;
+    align-items: center;
+    gap: 30px; /* Відстань між галочкою і хрестиком */
+    width: 100%;
+}
+
+/* ========================================= */
+/* 2. ІНТЕРАКТИВНІ КНОПКИ (Так / Ні)         */
+/* ========================================= */
+.prompt-action-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: none;
+}
+
+/* Ефект світіння та збільшення при наведенні */
+.prompt-action-btn:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.9));
+}
+
+/* Ефект втискання при кліку */
+.prompt-action-btn:active {
+    transform: scale(0.9);
+}
+
+/* ========================================= */
+/* 3. КАРТИНКИ ВСЕРЕДИНІ КНОПОК (Галочка/Хрестик) */
+/* ========================================= */
+.prompt-icon {
+    width: 50px !important; /* Жорстко фіксуємо розмір */
+    height: 50px !important; 
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); 
+}
+
+/* ========================================= */
+/* 4. КНОПКА ВИЯВИТИ АНОМАЛІЇ                */
+/* ========================================= */
+.detect-btn {
+    background: rgba(0, 229, 255, 0.04); 
+    color: #00E5FF; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 2.5px;
+    border: 1px solid rgba(0, 229, 255, 0.4); 
+    border-radius: 6px; 
+    padding: 16px 54px; 
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    text-transform: uppercase;
+}
+
+.detect-btn:hover {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.25), inset 0 0 12px rgba(0, 229, 255, 0.1);
+    color: #FFFFFF; 
+}
+
+.detect-btn:active {
+    background: rgba(0, 229, 255, 0.18);
+    transform: scale(0.98); 
+}
+
+/* ========================================= */
+/* БЛОК ВИБОРУ ШВИДКОСТІ                     */
+/* ========================================= */
+.speed-options {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px; /* Відстань між кнопками */
+    width: 100%;
+}
+
+.speed-btn {
+    flex: 1; /* Кнопки займають рівне місце */
+    background: rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    color: rgba(0, 229, 255, 0.7);
+    border-radius: 4px;
+    padding: 10px 5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 1px;
+    cursor: url('cursor.png') 0 0, pointer !important;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    box-sizing: border-box;
-    /* Добавляем плавность появления/исчезновения */
-    transition: opacity 0.5s ease; 
+    gap: 4px;
 }
 
-/* СКРЫВАЕМ рамку, когда сайдбар на весь экран (на стартовой странице) */
-.sidebar.expanded .color-prompt-frame {
-    opacity: 0;
-    pointer-events: none; /* Чтобы не нажималась, пока скрыта */
+/* Дрібний текст (кадри) під основною назвою */
+.speed-btn span {
+    font-size: 10px;
+    color: #A0A5B5;
+    font-weight: 400;
+    font-family: monospace;
 }
 
-/* ПОКАЗЫВАЕМ рамку, когда сайдбар съехал влево (в рабочем режиме) */
-.sidebar.collapsed .color-prompt-frame {
-    opacity: 1;
-    pointer-events: auto;
+/* Наведення мишкою */
+.speed-btn:hover {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: rgba(0, 229, 255, 0.6);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.speed-btn:hover span {
+    color: rgba(0, 229, 255, 0.8);
+}
+
+/* Активна (обрана) кнопка */
+.speed-btn.active {
+    background: rgba(0, 229, 255, 0.25);
+    border-color: #00E5FF;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4), inset 0 0 8px rgba(0, 229, 255, 0.2);
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.speed-btn.active span {
+    color: #00E5FF;
+}
+
+/* ========================================= */
+/* ЗАГОЛОВОК ДЛЯ БЛОКІВ У САЙДБАРІ           */
+/* ========================================= */
+.frame-title {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.3); /* Лінія під заголовком */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Легке світіння тексту */
+    width: 100%;
 }
