@@ -77,6 +77,14 @@ def set_irsa_ibe_unavailable(flag: bool = True) -> None:
     global _IRSA_IBE_UNAVAILABLE
     _IRSA_IBE_UNAVAILABLE = bool(flag)
 
+def inspect_s3_root():
+    session = get_http_session()
+    resp = session.get(
+        f"{S3_BUCKET_URL}/",
+        params={"list-type": "2", "delimiter": "/"},
+        timeout=10,
+    )
+    print(resp.text)
 
 def get_http_session() -> requests.Session:
     """Повертає потокобезпечну HTTP-сесію з пулом з'єднань, сертифікатами certifi та автоповторами."""
@@ -840,21 +848,31 @@ def _harvest_all_local_records() -> List[dict]:
 
 
 def read_s3_fits_header_fast(s3_url: str, with_wcs: bool = False) -> Optional[dict]:
-    """Читає перші 20 КБ FITS-файлу з AWS S3 через requests.Session (Range: bytes=0-20159)."""
+    """Читає перші 64 КБ FITS-файлу з AWS S3 (гарантовано захоплює повний заголовок і WCS)."""
     session = get_http_session()
     try:
-        resp = session.get(s3_url, headers={"Range": "bytes=0-20159"}, timeout=(6, 12))
+        resp = session.get(s3_url, headers={"Range": "bytes=0-65535"}, timeout=(6, 15))
         if resp.status_code not in (200, 206) or len(resp.content) < 5760:
             return None
 
-        text = resp.content[2880:].decode("ascii", errors="ignore")
-        end_pos = text.find("END     ")
-        if end_pos == -1:
+        text = resp.content.decode("ascii", errors="ignore")
+        first_end = text.find("END     ")
+        if first_end == -1:
             return None
 
-        hdr = fits.Header.fromstring(text[: end_pos + 80])
+        hdu1_offset = ((first_end + 80 + 2879) // 2880) * 2880
+        sub_text = text[hdu1_offset:]
+        second_end = sub_text.find("END     ")
+        if second_end == -1:
+            sub_text = text[:first_end + 80]
+        else:
+            sub_text = sub_text[:second_end + 80]
+
+        hdr = fits.Header.fromstring(sub_text)
         t_min = float(hdr.get("MJD-AVG", hdr.get("MJD-OBS", np.nan)))
-        if not np.isfinite(t_min):
+        ra_val = float(hdr.get("CRVAL1", np.nan))
+        dec_val = float(hdr.get("CRVAL2", np.nan))
+        if not (np.isfinite(t_min) and np.isfinite(ra_val) and np.isfinite(dec_val)):
             return None
 
         s3_key = s3_url.split("amazonaws.com/", 1)[-1].lstrip("/")
@@ -862,8 +880,8 @@ def read_s3_fits_header_fast(s3_url: str, with_wcs: bool = False) -> Optional[di
         band_str = f"SPHEREx-D{int(det)}" if det is not None else (_infer_band_from_text(s3_key) or DEFAULT_BAND)
         meta = {
             "s3_key": s3_key,
-            "s_ra": float(hdr.get("CRVAL1", np.nan)),
-            "s_dec": float(hdr.get("CRVAL2", np.nan)),
+            "s_ra": ra_val,
+            "s_dec": dec_val,
             "t_min": t_min,
             "band": band_str,
             "s3_url": s3_url,
@@ -964,8 +982,7 @@ def _level3_s3_direct_search(
         if not np.isfinite(r_ra) or not np.isfinite(r_dec) or not np.isfinite(t_min):
             continue
         sep = float(coord.separation(SkyCoord(r_ra * u.deg, r_dec * u.deg, frame="icrs")).deg)
-        tol = 0.05 if rec.get("exact_target") else 1.70
-        if sep <= tol:
+        if sep <= 2.5:
             matched_Near.append(rec)
             m_wk = re.match(r"^(.+?20\d{2}W\d{2}[^/]*/)", str(rec.get("s3_key", "")))
             if m_wk:
@@ -998,13 +1015,13 @@ def _level3_s3_direct_search(
         scored_ep1.sort(key=lambda x: x[0])
         scored_ep2.sort(key=lambda x: x[0])
         target_weeks = list(dict.fromkeys(
-            known_target_weeks + [wp for _, wp in scored_ep1[:3]] + [wp for _, wp in scored_ep2[:3]]
+            known_target_weeks + [wp for _, wp in scored_ep1[:6]] + [wp for _, wp in scored_ep2[:6]]
         ))
 
         dense_exposures: List[List[str]] = []
         for wp in target_weeks:
             try:
-                all_keys = _list_fits_in_prefix(wp, max_pages=40)
+                all_keys = _list_fits_in_prefix(wp, max_pages=60)
             except Exception:
                 continue
             if not all_keys:
@@ -1019,7 +1036,7 @@ def _level3_s3_direct_search(
             if not exp_list:
                 continue
 
-            coarse_indices = list(range(0, len(exp_list), 10))
+            coarse_indices = list(range(0, len(exp_list), 8))
             coarse_map = {
                 next((u_str for u_str in exp_list[i] if "D1" in Path(u_str).name or "D2" in Path(u_str).name), exp_list[i][0]): i
                 for i in coarse_indices
@@ -1035,13 +1052,16 @@ def _level3_s3_direct_search(
                         sep = float(coord.separation(
                             SkyCoord(meta["s_ra"] * u.deg, meta["s_dec"] * u.deg, frame="icrs")
                         ).deg)
-                        if sep <= 14.0:
+                        if sep <= 15.0:
                             hit_indices.append(idx)
 
             selected_idx_set = set()
             for h_idx in hit_indices:
-                for j in range(max(0, h_idx - 75), min(len(exp_list), h_idx + 76)):
+                for j in range(max(0, h_idx - 85), min(len(exp_list), h_idx + 86)):
                     selected_idx_set.add(j)
+
+            if not selected_idx_set:
+                selected_idx_set.update(range(0, len(exp_list), 4))
 
             for j in sorted(selected_idx_set):
                 dense_exposures.append(exp_list[j])
@@ -1065,12 +1085,23 @@ def _level3_s3_direct_search(
             for fut in as_completed(futures):
                 p_url = futures[fut]
                 meta = fut.result()
-                if not meta or "wcs" not in meta:
+                if not meta:
                     continue
                 try:
-                    px, py = meta["wcs"].world_to_pixel(coord)
-                    px, py = float(px), float(py)
-                    if np.isfinite(px) and np.isfinite(py) and (margin_px <= px <= 2040 - margin_px) and (margin_px <= py <= 2040 - margin_px):
+                    is_hit = False
+                    if "wcs" in meta:
+                        px, py = meta["wcs"].world_to_pixel(coord)
+                        px, py = float(px), float(py)
+                        if np.isfinite(px) and np.isfinite(py) and (margin_px <= px <= 2048 - margin_px) and (margin_px <= py <= 2048 - margin_px):
+                            is_hit = True
+                    if not is_hit:
+                        sep = float(coord.separation(
+                            SkyCoord(meta["s_ra"] * u.deg, meta["s_dec"] * u.deg, frame="icrs")
+                        ).deg)
+                        if sep <= 2.3:
+                            is_hit = True
+
+                    if is_hit:
                         for sib_url in probe_to_group[p_url]:
                             s3_key = sib_url.split("amazonaws.com/", 1)[-1].lstrip("/")
                             rec_item = {
