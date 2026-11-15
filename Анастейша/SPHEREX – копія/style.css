@@ -17,11 +17,14 @@ body {
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.75); 
     
-    background-image: url('-2147483648_-216231.jpg'); 
+    
+    /* Додано linear-gradient для затемнення */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('9d5bbf5f-1fa7-4942-8496-beeaa3488991.png'); 
     background-size: cover; 
     background-position: center; 
     background-repeat: no-repeat; 
 }
+
 
 /* Базовий стиль сайдбару */
 .sidebar {
@@ -76,19 +79,25 @@ body {
   
 
 .logo {
-    font-size: 24px;
+    font-size: 30px;
     font-weight: 700;
     color: #FFFFFF;
+    margin-bottom: 20px;
 }
 
 .logo .sub-word {
     display: block;
 }
+
 .desc {
     font-size: 14px;
     color: #A0A5B5;
     line-height: 1.6;
     margin: 0;
+    /* МАГІЯ: підтягуємо текст вище до заголовка */
+    margin-top: -10px; 
+    /* Відштовхуємо рамку, що знаходиться під ним */
+    margin-bottom: 25px; 
 }
 
 /* Контейнер для фотографії */
@@ -183,11 +192,12 @@ body {
 
 /* Підписи */
 .timeline-labels {
-    width: 100%;
-    margin-top: 15px;
+   width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; 
     align-items: center;
+    margin-top: -150px; /* <--- Измените это значение. Чем меньше цифра, тем выше поднимется текст */
+    margin-bottom: 15px;
     font-size: 12px;
     color: #FFB300;
     font-family: monospace;
@@ -301,12 +311,15 @@ body {
     margin: 0 auto; 
     box-sizing: border-box; 
     background: transparent; 
-    border-radius: 0; 
+    border-radius: 4px; /* Легке закруглення, щоб виглядало сучасніше */
+    border: 1px solid rgba(0, 229, 255, 0.2); /* Додали тонку видиму межу */
     padding: 20px;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
-    font-family: 'Arial', sans-serif;
     
+    /* Збільшили радіус та яскравість світіння (було 0.1, стало 0.25) */
+    box-shadow: 0 0 5px rgba(0, 229, 255, 0.25), inset 0 0 15px rgba(0, 229, 255, 0.1);
+    font-family: 'Arial', sans-serif;
 }
+
 /* Контейнер для кожного окремого поля */
 .frame-data-row {
   display: flex;
@@ -424,12 +437,12 @@ body {
 
 /* Ефекти наведення (обов'язково залишаємо translateX, щоб вона не з'їжджала вбік) */
 .back-action-btn:hover {
-    transform: translateX(-50%) scale(1.1);
+    transform: scale(1.1);
     filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.8));
 }
 
 .back-action-btn:active {
-    transform: translateX(-50%) scale(0.95);
+    transform: scale(0.95);
 }
 
 /* Кнопка "Вперед" на главной странице */
@@ -476,11 +489,11 @@ body {
 /* ========================================= */
 .color-prompt-frame {
     position: absolute;
-    right: 15%; /* Відступаємо 10% від правого краю екрана, щоб не прилипала */
-    top: 25%; /* Центруємо по вертикалі */
+    left: 10%; /* Відступаємо 10% від правого краю екрана, щоб не прилипала */
+    top: 55%; /* Центруємо по вертикалі */
     transform: translateY(-50%); /* Точне вирівнювання */
     
-    width: 220px; /* Компактна ширина */
+    width: 250px; /* Компактна ширина */
     background: rgba(0, 0, 0, 0.5); /* Напівпрозорий темний фон, щоб не зливалося із зірками */
     padding: 20px;
     border: 1px solid rgba(0, 229, 255, 0.3);
@@ -505,36 +518,75 @@ body {
 /* ========================================= */
 /* 2. ІНТЕРАКТИВНІ КНОПКИ (Так / Ні)         */
 /* ========================================= */
-.prompt-action-btn {
-    background: transparent;
+.custom-checkbox {
+    display: inline-block;
+    position: relative;
+    padding-left: 35px; /* Місце для квадрата */
+    margin-bottom: 25px;
+    cursor: url('cursor.png') 0 0, pointer !important; /* Твій курсор */
+    font-size: 22px;
+    user-select: none;
+}
+
+/* Ховаємо стандартний системний чекбокс */
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Створюємо наш порожній квадрат */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Центруємо квадрат */
+    left: 50%;
+    transform: translateX(-50%);
+    height: 30px;
+    width: 30px;
+    background-color: transparent;
+    border: 2px solid rgba(0, 229, 255, 0.5); /* Блакитна рамка */
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    border-radius: 4px; /* Легке закруглення кутів */
+    transition: all 0.3s ease;
+}
+
+/* Ефект при наведенні на квадрат */
+
+
+
+
+/* Створюємо саму галочку (вона прихована за замовчуванням) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Показуємо галочку, коли чекбокс активний */
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Відображаємо твою стару картинку (yes.png) замість CSS-галочки */
+.custom-checkbox .checkmark:after {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('yes.png');
+    background-size: 130%; /* Можеш змінювати відсоток (наприклад 100% або 150%), щоб зробити галочку більшою чи меншою */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Прибираємо старі налаштування CSS-ліній */
     border: none;
-    padding: 0;
-    cursor: url('cursor.png') 0 0, pointer !important;
-    transition: transform 0.2s ease, filter 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    outline: none;
-}
-
-/* Ефект світіння та збільшення при наведенні */
-.prompt-action-btn:hover {
-    transform: scale(1.15);
-    filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.9));
-}
-
-/* Ефект втискання при кліку */
-.prompt-action-btn:active {
-    transform: scale(0.9);
-}
-
-/* ========================================= */
-/* 3. КАРТИНКИ ВСЕРЕДИНІ КНОПОК (Галочка/Хрестик) */
-/* ========================================= */
-.prompt-icon {
-    width: 50px !important; /* Жорстко фіксуємо розмір */
-    height: 50px !important; 
-    object-fit: contain;
+    transform: none;
+    
+    /* Додаємо легке світіння для самої картинки */
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); 
 }
 
@@ -577,6 +629,7 @@ body {
     justify-content: space-between;
     gap: 8px; /* Відстань між кнопками */
     width: 100%;
+    margin-bottom: 15px;
 }
 
 .speed-btn {
@@ -585,23 +638,25 @@ body {
     border: 1px solid rgba(0, 229, 255, 0.2);
     color: rgba(0, 229, 255, 0.7);
     border-radius: 4px;
-    padding: 10px 5px;
+    padding: 8px 2px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     text-align: center;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     cursor: url('cursor.png') 0 0, pointer !important;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 4px;
+    word-break: break-word; 
 }
 
 /* Дрібний текст (кадри) під основною назвою */
 .speed-btn span {
-    font-size: 10px;
+    font-size: 9px;
     color: #A0A5B5;
     font-weight: 400;
     font-family: monospace;
@@ -647,4 +702,23 @@ body {
     border-bottom: 1px solid rgba(0, 229, 255, 0.3); /* Лінія під заголовком */
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Легке світіння тексту */
     width: 100%;
+}
+
+.viewport-info-frame {
+    position: absolute; /* Відриває текст від центру */
+    left: 10%;          /* Притискає до лівого краю екрана */
+    top: 35%;           /* Опускає на середину по вертикалі */
+    transform: translateY(-50%); /* Точне центрування */
+    
+    width: 250px; 
+    background: rgba(0, 0, 0, 0.75); /* Додає темний фон */
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3); /* Блакитна рамочка */
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column;
+    gap: 0px; 
+    box-sizing: border-box;
+    z-index: 50;
 }

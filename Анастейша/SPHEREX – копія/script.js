@@ -225,35 +225,24 @@ btnGoForward.addEventListener('click', () => {
     mainViewport.classList.remove('hidden');
 });
 
-// Знаходимо кнопки Так і Ні
-const btnColorYes = document.getElementById('btn-color-yes');
-const btnColorNo = document.getElementById('btn-color-no');
-const currentFrameImg = document.getElementById('current-frame-img'); // Твоя фотографія космосу
+// Знаходимо наш новий чекбокс та картинку
+const colorToggleCheckbox = document.getElementById('color-toggle-checkbox');
+const currentFrameImg = document.getElementById('current-frame-img'); 
 
-// Логіка для кнопки ТАК (Галочка)
-btnColorYes.addEventListener('click', () => {
-    console.log("Запит на бекенд: завантажити КОЛЬОРОВУ картинку...");
-    
-    // В МАЙБУТНЬОМУ ТУТ БУДЕ КОД БЕКЕНДУ:
-    // fetch('/api/get-color-image') ...
-    // currentFrameImg.src = 'шлях_до_кольорової_картинки_від_бекенду.jpg';
-    
-    // Візуальний відгук (робимо кнопку активнішою)
-    btnColorYes.style.filter = 'drop-shadow(0 0 15px rgba(0, 255, 0, 0.8))'; // Зелене світіння
-    setTimeout(() => btnColorYes.style.filter = '', 300); // Повертаємо назад
-});
-
-// Логіка для кнопки НІ (Хрестик)
-btnColorNo.addEventListener('click', () => {
-    console.log("Запит на бекенд: завантажити ЧОРНО-БІЛУ картинку...");
-    
-    // В МАЙБУТНЬОМУ ТУТ БУДЕ КОД БЕКЕНДУ:
-    // currentFrameImg.src = 'шлях_до_звичайної_картинки.jpg';
-    
-    // Візуальний відгук
-    btnColorNo.style.filter = 'drop-shadow(0 0 15px rgba(255, 0, 0, 0.8))'; // Червоне світіння
-    setTimeout(() => btnColorNo.style.filter = '', 300);
-});
+// Логіка для чекбокса "Show in colour?"
+if (colorToggleCheckbox) {
+    colorToggleCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Чекбокс УВІМКНЕНО (галочка стоїть)
+            console.log("Запит на бекенд: завантажити КОЛЬОРОВУ картинку...");
+            
+        } else {
+            // Чекбокс ВИМКНЕНО (порожній квадрат)
+            console.log("Запит на бекенд: завантажити ЧОРНО-БІЛУ картинку...");
+            
+        }
+    });
+}
 
 // ==========================================
 // ЛОГІКА ВИБОРУ ШВИДКОСТІ
