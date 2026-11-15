@@ -46,6 +46,14 @@ body {
     flex-shrink: 0;
 }
 
+.sidebar.collapsed .sidebar-info-frame {
+    /* Наприклад, опускаємо її трохи нижче: */
+    margin-top: 60px; 
+    
+    /* Або, якщо хочете посунути її лівіше/правіше (оскільки вона має width: 85% і margin: 0 auto): */
+    /* transform: translateX(-10px); */ 
+} 
+
 /* СТАН 2: Робочий режим (звужений сайдбар) */
 .sidebar.collapsed {
     width: 350px;
@@ -109,6 +117,7 @@ body {
     box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
     margin-bottom: 40px; /* Відступ вниз до таймлайну */
     background: #000;
+    right: 20px;
 }
 
 .backend-frame-img {
@@ -373,6 +382,7 @@ body {
     margin-bottom: 5px;
     z-index: 20;             /* Чтобы кнопки были поверх других слоев */
     position: relative;
+     right: 20px;
 }
 
 .control-btn {
@@ -456,7 +466,7 @@ body {
     border: none;
     padding: 0;
     cursor: url('cursor.png') 0 0, pointer !important;
-    transition: transform 0.2s ease, filter 0.2s ease, opacity 0.5s ease;
+    transition: transform 0.2s ease, filter 0.2s ease;
     opacity: 1;
     pointer-events: auto;
     
@@ -721,4 +731,38 @@ body {
     gap: 0px; 
     box-sizing: border-box;
     z-index: 50;
+}
+
+.description-info-frame {
+    position: absolute;
+    right: 10%; /* Трохи зменшив відступ, бо рамка стала ширшою */
+    top: 45%;  /* Ставимо по центру */
+    transform: translateY(-50%);
+    
+    width: 300px; /* Збільшена ширина, щоб текст ліг красивими пропорціями */
+    height: auto; /* Висота автоматично підлаштується під об'єм тексту */
+    
+    background: rgba(0, 0, 0, 0.75); 
+    padding: 20px;
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.05);
+    
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+    box-sizing: border-box;
+    z-index: 50;
+}
+
+.description-info-frame .frame-title {
+    margin-bottom: 2px;
+    font-size: 12px; /* Заголовок трохи більший, щоб виділявся */
+    color: #FFFFFF;
+}
+
+.desc-text {
+    color: #A0A5B5; 
+    font-size: 13px; /* Оптимальний розмір для читання */
+    line-height: 1.6; /* Збільшив міжрядковий інтервал для кращого сприйняття тексту */
+    text-align: justify; /* Вирівнювання по ширині виглядає дуже акуратно в таких UI */
 }
