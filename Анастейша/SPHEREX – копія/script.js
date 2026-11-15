@@ -1,5 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    let currentLimit = 1;
+    let totalFrames = 1;
+    let epochsData = [];
+
+    const frameImg = document.getElementById('current-frame-img');
+    const colorToggleCheckbox = document.getElementById('color-toggle-checkbox');
+    const valViewportData = document.getElementById('val-viewport-data');
+    const slider = document.getElementById('orbit-slider');
+    const frameCounter = document.getElementById('frame-counter');
+
+    function parseTargetInput(raw) {
+        const cleaned = (raw || '').trim();
+        if (!cleaned || cleaned.startsWith('M101/RA')) return 'M101';
+        return cleaned;
+    }
+
+    function parseBandInput(raw) {
+        const cleaned = (raw || '').replace(/['"]/g, '').trim();
+        if (!cleaned || cleaned.includes('D2 D3,D4 all')) return 'D3';
+        return cleaned;
+    }
+
+    function loadFrameImage(frameIndex) {
+        if (!frameImg) return;
+        const isColor = colorToggleCheckbox ? colorToggleCheckbox.checked : true;
+        const url = `${API_BASE}/api/frame/${frameIndex}?is_color=${isColor}&t=${Date.now()}`;
+
+        if (valViewportData && epochsData[frameIndex]) {
+            const ep = epochsData[frameIndex];
+            valViewportData.textContent = ep.date_start === ep.date_end
+                ? ep.date_start
+                : `${ep.date_start} — ${ep.date_end}`;
+        }
+
+        frameImg.onerror = () => {
+            if (!isColor) {
+                if (colorToggleCheckbox) colorToggleCheckbox.checked = true;
+                frameImg.onerror = null;
+                frameImg.src = `${API_BASE}/api/frame/${frameIndex}?is_color=true&t=${Date.now()}`;
+            }
+        };
+
+        frameImg.src = url;
+    }
+
     // ==========================================
     // 1. ЛОГІКА ПЕРЕХОДУ НА РОБОЧУ ЗОНУ
     // ==========================================
@@ -9,14 +55,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainViewport = document.getElementById('main-viewport');
 
     if (detectBtn) {
-        detectBtn.addEventListener('click', function() {
+        detectBtn.addEventListener('click', async function () {
             if (loader) loader.classList.add('active');
             detectBtn.style.opacity = '0.5';
             detectBtn.style.pointerEvents = 'none';
 
-            setTimeout(() => {
+            const targetEl = document.getElementById('val-target');
+            const bandEl = document.getElementById('val-band');
+
+            const target = parseTargetInput(targetEl ? targetEl.textContent : 'M101');
+            const band = parseBandInput(bandEl ? bandEl.textContent : 'D3');
+
+            try {
+                const params = new URLSearchParams({
+                    target: target,
+                    band: band,
+                    limit: String(currentLimit)
+                });
+
+                const minAnimationDelay = new Promise(resolve => setTimeout(resolve, 2000));
+                const apiRequest = fetch(`${API_BASE}/api/get-anomaly?${params.toString()}`).then(async res => {
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        throw new Error(`HTTP ${res.status}: ${errText}`);
+                    }
+                    return res.json();
+                });
+
+                const [data] = await Promise.all([apiRequest, minAnimationDelay]);
+
+                epochsData = Array.isArray(data.epochs) ? data.epochs : [];
+                totalFrames = Math.max(1, data.total_frames || epochsData.length || 1);
+
+                if (slider) {
+                    slider.min = '1';
+                    slider.max = String(totalFrames);
+                    slider.value = '1';
+                }
+
+                if (frameCounter) {
+                    frameCounter.textContent = `Кадр: 1 / ${totalFrames}`;
+                }
+
+                if (colorToggleCheckbox) {
+                    colorToggleCheckbox.checked = true;
+                }
+
+                loadFrameImage(0);
+
                 if (loader) loader.classList.remove('active');
-                
+
                 const detectContainer = document.querySelector('.detection-container');
                 if (detectContainer) detectContainer.style.display = 'none';
 
@@ -24,40 +112,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     sidebar.classList.remove('expanded');
                     sidebar.classList.add('collapsed');
                 }
-                
+
                 if (mainViewport) {
                     mainViewport.classList.remove('hidden');
                 }
 
-                // ВСТАВЛЯЄМО ДАНІ, ЩО ВІДПОВІДАЮТЬ ВАШОМУ МАКЕТУ
-                // 1. Дата
-                const valDate = document.getElementById('val-date');
-                if (valDate) valDate.textContent = "March 2025"; 
-
-                // 2. Довжина хвилі
-                const valWavelengths = document.getElementById('val-wavelengths');
-                if (valWavelengths) valWavelengths.textContent = "0.75 - 5.0 μm";  
-
-                // Якщо у вас залишились старі поля (наприклад, координати), вони оновляться тут:
-                const valCoords = document.getElementById('val-coords');
-                if (valCoords) valCoords.textContent = "M101/RA, DEC = 210,8, 54,35"; 
-
                 setTimeout(() => {
-                    window.dispatchEvent(new Event('resize')); 
-                }, 800); 
-                
-            }, 2000); 
+                    window.dispatchEvent(new Event('resize'));
+                }, 800);
+
+            } catch (error) {
+                console.error('Помилка запиту до бекенду:', error);
+                if (loader) loader.classList.remove('active');
+                alert(`Не вдалося отримати дані з сервера (${API_BASE}). Перевір, чи запущений uvicorn.\n\nДеталі: ${error.message}`);
+            } finally {
+                detectBtn.style.opacity = '1';
+                detectBtn.style.pointerEvents = 'auto';
+            }
         });
     }
 
     // ==========================================
     // 2. ЛОГІКА ТАЙМЛАЙНУ ТА ПЛЕЄРА
     // ==========================================
-    const slider = document.getElementById('orbit-slider');
     const sunThumb = document.getElementById('sun-thumb');
     const orbitPath = document.getElementById('orbit-path');
     const trackContainer = document.querySelector('.orbit-track-container');
-    const frameCounter = document.getElementById('frame-counter');
 
     const playPauseBtn = document.getElementById('btn-play-pause');
     const playPauseImg = document.getElementById('play-pause-img');
@@ -75,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function updateSunPosition() {
             const rawVal = parseFloat(slider.value);
-            const max = parseInt(slider.max, 10);
+            const max = Math.max(1, parseInt(slider.max, 10));
             const min = parseInt(slider.min, 10);
             const currentFrame = Math.round(rawVal);
 
@@ -83,12 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 frameCounter.textContent = `Кадр: ${currentFrame} / ${max}`;
             }
 
-            const progress = (rawVal - min) / (max - min); 
+            const progress = max === min ? 0.5 : (rawVal - min) / (max - min);
             const point = orbitPath.getPointAtLength(progress * pathLength);
-            
+
             const containerRect = trackContainer.getBoundingClientRect();
-            
-            if (containerRect.width === 0) return; 
+            if (containerRect.width === 0) return;
 
             const pixelX = (point.x / svgViewBoxWidth) * containerRect.width;
             const pixelY = (point.y / svgViewBoxHeight) * containerRect.height;
@@ -98,31 +177,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentFrame !== lastReportedFrame) {
                 lastReportedFrame = currentFrame;
-                // БЕКЕНД: запит на нову картинку
+                loadFrameImage(currentFrame - 1);
             }
         }
 
         function startSlideshow() {
             isPlaying = true;
-            if (playPauseImg) playPauseImg.src = 'pause.png'; 
-            
+            if (playPauseImg) playPauseImg.src = 'pause.png';
+
             playInterval = setInterval(() => {
                 let currentVal = parseFloat(slider.value);
                 let maxVal = parseFloat(slider.max);
-                
+
                 if (currentVal >= maxVal) {
-                    slider.value = slider.min; 
+                    slider.value = slider.min;
                 } else {
-                    slider.value = currentVal + 1; 
+                    slider.value = currentVal + 1;
                 }
                 updateSunPosition();
-            }, 500); 
+            }, 500);
         }
 
         function pauseSlideshow() {
             if (isPlaying) {
                 isPlaying = false;
-                if (playPauseImg) playPauseImg.src = 'play.png'; 
+                if (playPauseImg) playPauseImg.src = 'play.png';
                 clearInterval(playInterval);
             }
         }
@@ -141,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnPrev) {
             btnPrev.addEventListener('click', () => {
-                pauseSlideshow(); 
+                pauseSlideshow();
                 let currentFrame = Math.round(parseFloat(slider.value));
                 if (currentFrame > parseInt(slider.min, 10)) {
                     slider.value = currentFrame - 1;
@@ -152,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnNext) {
             btnNext.addEventListener('click', () => {
-                pauseSlideshow(); 
+                pauseSlideshow();
                 let currentFrame = Math.round(parseFloat(slider.value));
                 if (currentFrame < parseInt(slider.max, 10)) {
                     slider.value = currentFrame + 1;
@@ -174,25 +253,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnGoBack) {
         btnGoBack.addEventListener('click', () => {
             if (mainViewport) mainViewport.classList.add('hidden');
-            
+
+            const detectContainer = document.querySelector('.detection-container');
+            if (detectContainer) detectContainer.style.display = '';
+
             if (sidebar) {
                 sidebar.classList.remove('collapsed');
                 sidebar.classList.add('expanded');
             }
-            
+
             if (btnGoForward) btnGoForward.classList.remove('hidden');
         });
     }
 
     if (btnGoForward) {
         btnGoForward.addEventListener('click', () => {
+            const detectContainer = document.querySelector('.detection-container');
+            if (detectContainer) detectContainer.style.display = 'none';
+
             if (sidebar) {
                 sidebar.classList.remove('expanded');
                 sidebar.classList.add('collapsed');
             }
-            
+
             if (mainViewport) mainViewport.classList.remove('hidden');
-            
+
             btnGoForward.classList.add('hidden');
         });
     }
@@ -200,17 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
     // 4. ЛОГІКА ЧЕКБОКСА (КОЛІР)
     // ==========================================
-    const colorToggleCheckbox = document.getElementById('color-toggle-checkbox');
-    
     if (colorToggleCheckbox) {
-        colorToggleCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                console.log("Запит на бекенд: завантажити КОЛЬОРОВУ картинку...");
-                // БЕКЕНД: Логіка для кольору
-            } else {
-                console.log("Запит на бекенд: завантажити ЧОРНО-БІЛУ картинку...");
-                // БЕКЕНД: Логіка для ч/б
-            }
+        colorToggleCheckbox.addEventListener('change', function () {
+            const currentIdx = slider ? Math.max(0, Math.round(parseFloat(slider.value)) - 1) : 0;
+            loadFrameImage(currentIdx);
         });
     }
 
@@ -224,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 speedBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
-                const selectedSpeed = btn.getAttribute('data-speed');
-                console.log(`Обрана швидкість: ${selectedSpeed} fps`);
+
+                const selectedSpeed = parseInt(btn.getAttribute('data-speed'), 10);
+                currentLimit = selectedSpeed === 30 ? 1 : selectedSpeed;
             });
         });
     }

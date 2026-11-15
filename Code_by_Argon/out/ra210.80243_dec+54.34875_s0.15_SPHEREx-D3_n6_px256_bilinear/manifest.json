@@ -1,0 +1,109 @@
+{
+  "target": {
+    "ra_deg": 210.802429,
+    "dec_deg": 54.34875
+  },
+  "query": {
+    "size_deg": 0.15,
+    "band": "SPHEREx-D3",
+    "bands": [
+      "SPHEREx-D3"
+    ]
+  },
+  "image": {
+    "npix": 256,
+    "fov_deg": 0.10288403666264265,
+    "pixel_scale_arcsec": 1.4468067655684123,
+    "orientation": "north up, east left",
+    "format": "png",
+    "alpha": true,
+    "y_png_from_array_row": "y_png = npix - 1 - row"
+  },
+  "processing": {
+    "subtract_zodi": true,
+    "mask_outliers": false,
+    "cosmic_ray_filter": "7sigma_3x3_preserve_nans",
+    "interpolation": "bilinear",
+    "stretch": "per-frame asinh, percentiles 1..99.6"
+  },
+  "wcs": {
+    "ctype": [
+      "RA---TAN",
+      "DEC--TAN"
+    ],
+    "crval_deg": [
+      210.802429,
+      54.34875
+    ],
+    "crpix_1based": [
+      128.5,
+      128.5
+    ],
+    "cdelt_deg": [
+      -0.00040189076821344784,
+      0.00040189076821344784
+    ],
+    "note": "pixel (x, y), 0-based array coordinates; x increases to the west, y to the north"
+  },
+  "created_utc": "2026-11-15 20:47:19",
+  "min_coverage": 0.98,
+  "n_skipped_low_coverage": 1,
+  "wl_groups": [
+    {
+      "id": 0,
+      "frames": [
+        0,
+        2
+      ],
+      "n_frames": 2,
+      "center_um": 2.13216201768363
+    },
+    {
+      "id": 1,
+      "frames": [
+        1
+      ],
+      "n_frames": 1,
+      "center_um": 2.3504097957396306
+    }
+  ],
+  "n_frames": 3,
+  "frames": [
+    {
+      "index": 0,
+      "file": "frame_000.png",
+      "mjd": 60824.601246918,
+      "date_utc": "2025-05-29 14:25:47",
+      "wavelength_um": 2.1471062431267054,
+      "detector": 3,
+      "band": "SPHEREx-D3",
+      "source_file": "level2_2025W22_2B_0019_1D3_spx_l2b-v27-2026-200__8a7e8c71.fits",
+      "coverage": 1.0,
+      "wl_group": 0
+    },
+    {
+      "index": 1,
+      "file": "frame_001.png",
+      "mjd": 60825.281323608,
+      "date_utc": "2025-05-30 06:45:06",
+      "wavelength_um": 2.3504097957396306,
+      "detector": 3,
+      "band": "SPHEREx-D3",
+      "source_file": "level2_2025W22_2B_0140_1D3_spx_l2b-v27-2026-200__c7a17c16.fits",
+      "coverage": 1.0,
+      "wl_group": 1
+    },
+    {
+      "index": 2,
+      "file": "frame_002.png",
+      "mjd": 61022.51938281,
+      "date_utc": "2025-12-13 12:27:54",
+      "wavelength_um": 2.117217792240554,
+      "detector": 3,
+      "band": "SPHEREx-D3",
+      "source_file": "level2_2025W50_2A_0543_4D3_spx_l2b-v27-2026-210__886a79f5.fits",
+      "coverage": 1.0,
+      "wl_group": 0
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+idx,date_utc,mjd,wavelength_um,detector,x_pix,y_pix,shape,file
+0,2025-05-30 06:45:06,60825.28132,2.3504,3,102.5,102.5,205x205,level2_2025W22_2B_0140_1D3_spx_l2b-v27-2026-200__4fb6ca6b.fits
